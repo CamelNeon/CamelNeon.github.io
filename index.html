@@ -3,46 +3,46 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Convertisseur km → miles</title>
-  <meta name="description" content="Petit site statique pour convertir des kilomètres en miles. Conçu pour être hébergé sur GitHub Pages." />
+  <title>Converter 🥕</title>
+  <meta name="description" content="Convert kilo joules to the speed of an average carrot if all that energy was converted to speed" />
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <main class="card" role="main">
-    <h1>Convertisseur kilomètres → miles</h1>
-    <p class="lead">Entrez une distance en <strong>kilomètres</strong> pour obtenir sa valeur en <strong>miles</strong>. Ce site est entièrement statique et prêt pour GitHub Pages.</p>
+    <h1>Converter kJ → carrot speed</h1>
+    <p class="lead">Enter an energy quantity in kilo Joules to get the corresponding speed of an average carrot if all that energy was converted to speed</p>
 
     <form id="convForm" autocomplete="off">
       <div>
-        <label for="km">Kilomètres (km)</label>
-        <input id="km" name="km" type="number" inputmode="decimal" step="any" min="0" placeholder="ex: 5.2" aria-describedby="kmHelp">
-        <div id="kmHelp" class="small">Saisissez un nombre — utilisez la touche Entrée ou le bouton « Convertir ».</div>
+        <label for="kJ">Kilojoule (kJ)</label>
+        <input id="kJ" name="kJ" type="number" inputmode="decimal" step="any" min="0" placeholder="ex: 5.2" aria-describedby="kJHelp">
+        <div id="kJHelp" class="small">Enter a number - press the Enter key or the « Convert » button</div>
       </div>
 
       <div class="controls">
-        <label for="precision" class="small" style="margin-right:8px">Précision</label>
-        <select id="precision" aria-label="Précision" title="Nombre de décimales">
-          <option value="2">2 décimales</option>
-          <option value="3">3 décimales</option>
-          <option value="4">4 décimales</option>
-          <option value="6">6 décimales</option>
+        <label for="precision" class="small" style="margin-right:8px">Precision</label>
+        <select id="precision" aria-label="Precision" title="Number of decimal">
+          <option value="2">2 decimals</option>
+          <option value="3">3 decimals</option>
+          <option value="4">4 decimals</option>
+          <option value="6">6 decimals</option>
         </select>
       </div>
 
       <div class="result" aria-live="polite">
         <div>
-          <div class="small">Résultat</div>
+          <div class="small">Result</div>
           <div id="output" class="value">—</div>
-          <div id="explain" class="small">1 km = 0.62137119223733 miles</div>
+          <div id="explain" class="small">1 kJ = 181,07149208503706187231006300564 m/s</div>
         </div>
         <div style="display:flex;flex-direction:column;gap:8px">
-          <button id="copyBtn" type="button" class="ghost">Copier</button>
-          <button id="resetBtn" type="button" class="ghost">Réinitialiser</button>
+          <button id="copyBtn" type="button" class="ghost">Copy</button>
+          <button id="resetBtn" type="button" class="ghost">Reset</button>
         </div>
       </div>
 
       <div style="grid-column:1/-1;display:flex;gap:8px;justify-content:flex-end;margin-top:6px">
-        <button id="convertBtn" type="submit">Convertir</button>
+        <button id="convertBtn" type="submit">Convert</button>
       </div>
     </form>
   </main>

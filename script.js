@@ -1,8 +1,8 @@
 (function(){
-    const KM_TO_MILES = 0.62137119223733;
+    const KJ_TO_SPEED = 181.07149208503706187231006300564;
   
     const form = document.getElementById('convForm');
-    const kmInput = document.getElementById('km');
+    const kJInput = document.getElementById('kJ');
     const out = document.getElementById('output');
     const precisionSelect = document.getElementById('precision');
     const copyBtn = document.getElementById('copyBtn');
@@ -18,16 +18,16 @@
     }
   
     function convert(){
-      const km = Number(kmInput.value);
+      const kJ = Number(kJInput.value);
       const decimals = Number(precisionSelect.value);
-      if (!isFinite(km)){
-        out.textContent = 'Entrée invalide';
+      if (!isFinite(kJ)){
+        out.textContent = 'Invalid Input';
         return;
       }
-      const miles = km * KM_TO_MILES;
-      out.textContent = formatNumber(miles, decimals) + ' mi';
-      out.setAttribute('aria-label', formatNumber(miles, decimals) + ' miles');
-      return miles;
+      const speed = kJ * kJ_TO_SPEED;
+      out.textContent = formatNumber(speed, decimals) + ' mi';
+      out.setAttribute('aria-label', formatNumber(speed, decimals) + ' speed');
+      return speed;
     }
   
     form.addEventListener('submit', function(e){
@@ -37,33 +37,33 @@
   
     copyBtn.addEventListener('click', function(){
       const text = out.textContent.trim();
-      if (!text || text === '—' || text === 'Entrée invalide') return;
+      if (!text || text === '—' || text === 'Invalid Input') return;
       navigator.clipboard?.writeText(text).then(()=>{
-        copyBtn.textContent = 'Copié ✓';
-        setTimeout(()=> copyBtn.textContent = 'Copier', 1500);
+        copyBtn.textContent = 'Copied ✓';
+        setTimeout(()=> copyBtn.textContent = 'Copy', 1500);
       }).catch(()=>{
         const ta = document.createElement('textarea');
         ta.value = text; document.body.appendChild(ta); ta.select();
-        try{document.execCommand('copy'); copyBtn.textContent='Copié ✓'; setTimeout(()=>copyBtn.textContent='Copier',1500);}catch(e){alert('Impossible de copier')}
+        try{document.execCommand('copy'); copyBtn.textContent='Copied ✓'; setTimeout(()=>copyBtn.textContent='Copy',1500);}catch(e){alert('Impossible to copy')}
         ta.remove();
       });
     });
   
     resetBtn.addEventListener('click', function(){
-      kmInput.value = '';
+      kJInput.value = '';
       out.textContent = '—';
-      kmInput.focus();
+      kJInput.focus();
     });
   
     let typingTimer;
-    kmInput.addEventListener('input', function(){
+    kJInput.addEventListener('input', function(){
       clearTimeout(typingTimer);
       typingTimer = setTimeout(()=>{
-        if (kmInput.value.trim() !== '') convert();
+        if (kJInput.value.trim() !== '') convert();
       }, 400);
     });
   
-    kmInput.addEventListener('keydown', function(e){
+    kJInput.addEventListener('keydown', function(e){
       if (e.key === 'Enter'){
         e.preventDefault(); convert();
       }
