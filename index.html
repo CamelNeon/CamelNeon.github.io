@@ -8,6 +8,8 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <canvas id="animationCanvas"></canvas>
+  <div class="background" id="background"></div>
   <main class="card" role="main">
     <h1>Converter kJ → carrot speed</h1>
     <p class="lead">Enter an energy quantity in kilo Joules to get the corresponding speed of an average carrot if all that energy was converted to speed</p>
@@ -33,7 +35,7 @@
         <div>
           <div class="small">Result</div>
           <div id="output" class="value">—</div>
-          <div id="explain" class="small">1 kJ = 181,07149208503706187231006300564 m/s</div>
+          <div id="explain" class="small">The average carrot is 61 grams</div>
         </div>
         <div style="display:flex;flex-direction:column;gap:8px">
           <button id="copyBtn" type="button" class="ghost">Copy</button>
@@ -48,5 +50,6 @@
   </main>
 
   <script src="script.js"></script>
+  <script src="animation.js"></script>
 </body>
 </html>

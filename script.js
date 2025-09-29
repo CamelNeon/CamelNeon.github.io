@@ -1,5 +1,5 @@
 (function(){
-    const KJ_TO_SPEED = 181.07149208503706187231006300564;
+    const AVERAGE_CARROT_CONSTANT = 32.786885245901639344262295081967;
   
     const form = document.getElementById('convForm');
     const kJInput = document.getElementById('kJ');
@@ -24,8 +24,8 @@
         out.textContent = 'Invalid Input';
         return;
       }
-      const speed = kJ * KJ_TO_SPEED;
-      out.textContent = formatNumber(speed, decimals) + ' mi';
+      const speed = Math.sqrt(kJ * 1000 * AVERAGE_CARROT_CONSTANT);
+      out.textContent = formatNumber(speed, decimals) + ' m/s';
       out.setAttribute('aria-label', formatNumber(speed, decimals) + ' speed');
       return speed;
     }
