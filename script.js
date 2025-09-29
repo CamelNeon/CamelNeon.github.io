@@ -24,7 +24,7 @@
         out.textContent = 'Invalid Input';
         return;
       }
-      const speed = kJ * kJ_TO_SPEED;
+      const speed = kJ * KJ_TO_SPEED;
       out.textContent = formatNumber(speed, decimals) + ' mi';
       out.setAttribute('aria-label', formatNumber(speed, decimals) + ' speed');
       return speed;
