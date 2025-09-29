@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Convertisseur km → miles</title>
+  <meta name="description" content="Petit site statique pour convertir des kilomètres en miles. Conçu pour être hébergé sur GitHub Pages." />
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="card" role="main">
+    <h1>Convertisseur kilomètres → miles</h1>
+    <p class="lead">Entrez une distance en <strong>kilomètres</strong> pour obtenir sa valeur en <strong>miles</strong>. Ce site est entièrement statique et prêt pour GitHub Pages.</p>
+
+    <form id="convForm" autocomplete="off">
+      <div>
+        <label for="km">Kilomètres (km)</label>
+        <input id="km" name="km" type="number" inputmode="decimal" step="any" min="0" placeholder="ex: 5.2" aria-describedby="kmHelp">
+        <div id="kmHelp" class="small">Saisissez un nombre — utilisez la touche Entrée ou le bouton « Convertir ».</div>
+      </div>
+
+      <div class="controls">
+        <label for="precision" class="small" style="margin-right:8px">Précision</label>
+        <select id="precision" aria-label="Précision" title="Nombre de décimales">
+          <option value="2">2 décimales</option>
+          <option value="3">3 décimales</option>
+          <option value="4">4 décimales</option>
+          <option value="6">6 décimales</option>
+        </select>
+      </div>
+
+      <div class="result" aria-live="polite">
+        <div>
+          <div class="small">Résultat</div>
+          <div id="output" class="value">—</div>
+          <div id="explain" class="small">1 km = 0.62137119223733 miles</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <button id="copyBtn" type="button" class="ghost">Copier</button>
+          <button id="resetBtn" type="button" class="ghost">Réinitialiser</button>
+        </div>
+      </div>
+
+      <div style="grid-column:1/-1;display:flex;gap:8px;justify-content:flex-end;margin-top:6px">
+        <button id="convertBtn" type="submit">Convertir</button>
+      </div>
+    </form>
+
+    <footer>
+      <div>Statique • Déployez sur <strong>GitHub Pages</strong></div>
+      <div><a class="link" href="https://docs.github.com/en/pages">Guide GitHub Pages</a></div>
+    </footer>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
