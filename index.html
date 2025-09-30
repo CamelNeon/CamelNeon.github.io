@@ -1,23 +1,30 @@
 <!doctype html>
 <html lang="fr">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Converter 🥕</title>
-  <meta name="description" content="Convert kilo joules to the speed of an average carrot if all that energy was converted to speed" />
+  <meta name="description"
+    content="Convert kilo joules to the speed of an average carrot if all that energy was converted to speed" />
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
+  <div id="header-placeholder"></div>
+
   <canvas id="animationCanvas"></canvas>
   <div class="background" id="background"></div>
   <main class="card" role="main">
     <h1>Converter kJ → carrot speed</h1>
-    <p class="lead">Enter an energy quantity in kilo Joules to get the corresponding speed of an average carrot if all that energy was converted to speed</p>
+    <p class="lead">Enter an energy quantity in kilo Joules to get the corresponding speed of an average carrot if all
+      that energy was converted to speed</p>
 
     <form id="convForm" autocomplete="off">
       <div>
         <label for="kJ">Kilojoule (kJ)</label>
-        <input id="kJ" name="kJ" type="number" inputmode="decimal" step="any" min="0" placeholder="ex: 5.2" aria-describedby="kJHelp">
+        <input id="kJ" name="kJ" type="number" inputmode="decimal" step="any" min="0" placeholder="ex: 5.2"
+          aria-describedby="kJHelp">
         <div id="kJHelp" class="small">Enter a number - press the Enter key or the « Convert » button</div>
       </div>
 
@@ -50,6 +57,17 @@
   </main>
 
   <script src="script.js"></script>
+  <script src="convert_energy_speed.js"></script>
   <script src="animation.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      fetch("header.html")
+        .then(response => response.text())
+        .then(data => {
+          document.getElementById("header-placeholder").innerHTML = data;
+        });
+    });
+  </script>
 </body>
+
 </html>
