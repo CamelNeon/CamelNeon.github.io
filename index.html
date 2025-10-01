@@ -16,44 +16,39 @@
   <canvas id="animationCanvas"></canvas>
   <div class="background" id="background"></div>
   <main class="card" role="main">
-    <h1>Converter kJ → carrot speed</h1>
-    <p class="lead">Enter an energy quantity in kilo Joules to get the corresponding speed of an average carrot if all
+    <h1>Energy ↔ carrot speed</h1>
+    <p class="lead">Enter an energy quantity to get the corresponding speed of an average carrot if all
       that energy was converted to speed</p>
 
-    <form id="convForm" autocomplete="off">
-      <div>
-        <label for="kJ">Kilojoule (kJ)</label>
-        <input id="kJ" name="kJ" type="number" inputmode="decimal" step="any" min="0" placeholder="ex: 5.2"
-          aria-describedby="kJHelp">
-        <div id="kJHelp" class="small">Enter a number - press the Enter key or the « Convert » button</div>
-      </div>
-
-      <div class="controls">
-        <label for="precision" class="small" style="margin-right:8px">Precision</label>
-        <select id="precision" aria-label="Precision" title="Number of decimal">
-          <option value="2">2 decimals</option>
-          <option value="3">3 decimals</option>
-          <option value="4">4 decimals</option>
-          <option value="6">6 decimals</option>
-        </select>
-      </div>
-
-      <div class="result" aria-live="polite">
-        <div>
-          <div class="small">Result</div>
-          <div id="output" class="value">—</div>
-          <div id="explain" class="small">The average carrot is 61 grams</div>
+      <div class="converter">
+        <h1>Carrot Converter</h1>
+        
+        <div class="converter-row">
+          <input type="number" id="inputValue" placeholder="Enter value" />
+          <select id="inputUnit">
+            <option value="J">J</option>
+            <option value="kJ">kJ</option>
+            <option value="t">Kiloton of Tnt</option>
+          </select>
         </div>
-        <div style="display:flex;flex-direction:column;gap:8px">
-          <button id="copyBtn" type="button" class="ghost">Copy</button>
-          <button id="resetBtn" type="button" class="ghost">Reset</button>
+      
+        <button id="invertBtn">⇄</button>
+      
+        <div class="converter-row">
+          <input type="text" id="outputValue" placeholder="Result" readonly />
+          <select id="outputUnit">
+            <option value="ms">m/s</option>
+            <option value="kmh">km/h</option>
+            <option value="mph">Miles/h</option>
+            <option value="fps">Feet/s</option>
+          </select>
+        </div>
+      
+        <div class="converter-actions">
+          <button id="copyBtn">Copy</button>
+          <button id="resetBtn">Reset</button>
         </div>
       </div>
-
-      <div style="grid-column:1/-1;display:flex;gap:8px;justify-content:flex-end;margin-top:6px">
-        <button id="convertBtn" type="submit">Convert</button>
-      </div>
-    </form>
   </main>
 
   <script src="script.js"></script>
