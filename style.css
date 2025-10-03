@@ -100,10 +100,6 @@ header {
   color: darkblue;
 }
 
-.input-label {
-  display: block;
-}
-
 .dropdown:hover .dropdown-content {
   display: block;
 }
@@ -143,11 +139,6 @@ form {
   display: grid;
   gap: 12px;
   grid-template-columns: 1fr auto
-}
-
-label {
-  font-size: 13px;
-  color: var(--muted)
 }
 
 input {
@@ -225,6 +216,31 @@ button.ghost {
   justify-content: center;
   align-items: center;
   margin: 10px 0;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.field label {
+  margin-bottom: 6px;
+  font-weight: bold;
+  text-align: left;
+}
+
+.input-group {
+  display: flex;
+  gap: 8px;
+}
+
+.input-group input {
+  flex: 1;
+}
+
+.input-group select {
+  min-width: 120px;
 }
 
 .converter-row input {
