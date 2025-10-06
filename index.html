@@ -1,78 +1,156 @@
-<!doctype html>
-<html lang="fr">
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Converter 🥕</title>
-  <meta name="description"
-    content="Convert kilo joules to the speed of an average carrot if all that energy was converted to speed" />
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SteamerDev</title>
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(120deg, #ff7a00, #7f00ff);
+            background-size: 200% 200%;
+            animation: gradientShift 20s ease-in-out infinite alternate;
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        h1 {
+            position: absolute;
+            font-size: 5rem;
+            color: white;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+            pointer-events: none;
+            animation: float 30s ease-in-out infinite;
+            transition: transform 0s ease-out;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translate(0px, 0px);
+            }
+
+            20% {
+                transform: translate(20px, -20px);
+            }
+
+            40% {
+                transform: translate(-20px, -10px);
+            }
+
+            60% {
+                transform: translate(-10px, 20px);
+            }
+
+            80% {
+                transform: translate(20px, 10px);
+            }
+        }
+    </style>
 </head>
 
 <body>
-  <div id="header-placeholder"></div>
+    <div id="header-placeholder"></div>
+    <h1 id="title">SteamerDev</h1>
 
-  <canvas id="animationCanvas"></canvas>
-  <div class="background" id="background"></div>
-  <main class="card" role="main">
-    <h1>Energy ↔ carrot speed</h1>
-    <p class="lead">Enter an energy quantity to get the corresponding speed of an average carrot if all
-      that energy was converted to speed</p>
+    <script src="Scripts/header.js"></script>
+    <script>
+        const title = document.getElementById('title');
+        const margin = 40; // soft margin from borders
 
-    <div class="converter">
-      <h1>Carrot Converter</h1>
+        let targetX = window.innerWidth / 2;
+        let targetY = window.innerHeight / 2;
+        let currentX = targetX;
+        let currentY = targetY;
+        let velocityX = (Math.random() - 0.5) * 2;
+        let velocityY = (Math.random() - 0.5) * 2;
+        const easing = 0.02;
 
-      <div class="converter-row">
-        <div class="field">
-          <label id="inputLabel">Quantity of Energy</label>
-          <div class="input-group">
-            <input type="text" pattern="[0-9 ]+" id="inputValue" placeholder="Enter value" />
-            <select id="inputUnit">
-              <option value="J">J</option>
-              <option value="kJ">kJ</option>
-              <option value="t">Kiloton of Tnt</option>
-            </select>
-          </div>
-        </div>
-      </div>
+        document.addEventListener('mousemove', (e) => {
+            const rect = title.getBoundingClientRect();
+            const dx = e.clientX - (rect.left + rect.width / 2);
+            const dy = e.clientY - (rect.top + rect.height / 2);
+            const distance = Math.sqrt(dx * dx + dy * dy);
 
-      <button id="invertBtn">⇄</button>
-
-      <div class="converter-row">
-        <div class="field">
-          <label id="outputLabel">Carrot's speed</label>
-          <div class="input-group">
-            <input type="text" id="outputValue" placeholder="Result" readonly />
-            <select id="outputUnit">
-              <option value="ms">m/s</option>
-              <option value="kmh">km/h</option>
-              <option value="mph">Miles/h</option>
-              <option value="fps">Feet/s</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div class="converter-actions">
-        <button id="copyBtn">Copy</button>
-        <button id="resetBtn">Reset</button>
-      </div>
-    </div>
-  </main>
-
-  <script src="script.js"></script>
-  <script src="convert_energy_speed.js"></script>
-  <script src="animation.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      fetch("header.html")
-        .then(response => response.text())
-        .then(data => {
-          document.getElementById("header-placeholder").innerHTML = data;
+            if (distance < 15000) {
+                const angle = Math.atan2(dy, dx);
+                velocityX -= Math.cos(angle) * (15000 - distance) * 0.002;
+                velocityY -= Math.sin(angle) * (15000 - distance) * 0.002;
+            }
         });
-    });
-  </script>
+
+        function animate() {
+            targetX += velocityX;
+            targetY += velocityY;
+
+            // Bounce on borders
+            const rect = title.getBoundingClientRect();
+            if (targetX < margin) {
+                targetX = margin;
+                velocityX *= -0.8; // bounce and lose a bit of speed
+            }
+            if (targetX + rect.width > window.innerWidth - margin) {
+                targetX = window.innerWidth - margin - rect.width;
+                velocityX *= -0.8;
+            }
+            if (targetY - rect.height < margin) {
+                targetY = margin + rect.height;
+                velocityY *= -0.8;
+            }
+            if (targetY > window.innerHeight - margin) {
+                targetY = window.innerHeight - margin;
+                velocityY *= -0.8;
+            }
+
+            // Soft movement toward target
+            currentX += (targetX - currentX) * easing;
+            currentY += (targetY - currentY) * easing;
+
+            title.style.left = `${currentX}px`;
+            title.style.top = `${currentY}px`;
+
+            requestAnimationFrame(animate);
+        }
+
+        function centerText() {
+            const rect = title.getBoundingClientRect();
+            targetX = window.clientWidth / 2 - rect.width / 2;
+            targetY = window.clientHeight / 2 - rect.height / 2;
+            currentX = targetX;
+            currentY = targetY;
+            title.style.left = `${currentX}px`;
+            title.style.top = `${currentY}px`;
+        }
+
+        window.addEventListener('resize', centerText);
+        centerText();
+        //animate();
+    </script>
 </body>
 
 </html>

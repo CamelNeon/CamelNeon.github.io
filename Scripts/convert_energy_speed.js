@@ -35,7 +35,7 @@
       result = Math.sqrt((inputVal * conversions['input'][inputUnit] * 2) / AVERAGE_CARROT_WEIGTH) * conversions['output'][outputUnit];
     }
     else {
-      result = (AVERAGE_CARROT_WEIGTH * inputVal * inputVal / conversions['output'][inputUnit] / 2) / conversions['input'][outputUnit];
+      result = ((AVERAGE_CARROT_WEIGTH * (inputVal / conversions['output'][inputUnit]) ** 2) / 2) / conversions['input'][outputUnit];
     }
     document.getElementById('outputValue').value = formatNumber(result.toFixed(2));
   }
