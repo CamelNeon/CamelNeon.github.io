@@ -1,0 +1,65 @@
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(120deg, #ff7a00, #7f00ff);
+    background-size: 200% 200%;
+    animation: gradientShift 20s ease-in-out infinite alternate;
+}
+
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+h1 {
+    position: absolute;
+    font-size: 5rem;
+    color: white;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    pointer-events: none;
+    animation: float 30s ease-in-out infinite;
+    transition: transform 0s ease-out; 
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translate(0px, 0px);
+    }
+
+    20% {
+        transform: translate(20px, -20px);
+    }
+
+    40% {
+        transform: translate(-20px, -10px);
+    }
+
+    60% {
+        transform: translate(-10px, 20px);
+    }
+
+    80% {
+        transform: translate(20px, 10px);
+    }
+}

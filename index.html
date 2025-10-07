@@ -7,73 +7,7 @@
     <meta name="description"
     content="SteamerDev official website where everything you will find is very much official and useful, from converters to absolutely nothing else as of now" />
     <title>SteamerDev</title>
-    <style>
-        html,
-        body {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            overflow: hidden;
-        }
-
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(120deg, #ff7a00, #7f00ff);
-            background-size: 200% 200%;
-            animation: gradientShift 20s ease-in-out infinite alternate;
-        }
-
-        @keyframes gradientShift {
-            0% {
-                background-position: 0% 50%;
-            }
-
-            50% {
-                background-position: 100% 50%;
-            }
-
-            100% {
-                background-position: 0% 50%;
-            }
-        }
-
-        h1 {
-            position: absolute;
-            font-size: 5rem;
-            color: white;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-            pointer-events: none;
-            animation: float 30s ease-in-out infinite;
-            transition: transform 0s ease-out;
-        }
-
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translate(0px, 0px);
-            }
-
-            20% {
-                transform: translate(20px, -20px);
-            }
-
-            40% {
-                transform: translate(-20px, -10px);
-            }
-
-            60% {
-                transform: translate(-10px, 20px);
-            }
-
-            80% {
-                transform: translate(20px, 10px);
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="/Style/home.css">
 </head>
 
 <body>
@@ -81,78 +15,7 @@
     <h1 id="title">SteamerDev</h1>
 
     <script src="Scripts/header.js"></script>
-    <script>
-        const title = document.getElementById('title');
-        const margin = 40; // soft margin from borders
-
-        let targetX = window.innerWidth / 2;
-        let targetY = window.innerHeight / 2;
-        let currentX = targetX;
-        let currentY = targetY;
-        let velocityX = (Math.random() - 0.5) * 2;
-        let velocityY = (Math.random() - 0.5) * 2;
-        const easing = 0.02;
-
-        document.addEventListener('mousemove', (e) => {
-            const rect = title.getBoundingClientRect();
-            const dx = e.clientX - (rect.left + rect.width / 2);
-            const dy = e.clientY - (rect.top + rect.height / 2);
-            const distance = Math.sqrt(dx * dx + dy * dy);
-
-            if (distance < 15000) {
-                const angle = Math.atan2(dy, dx);
-                velocityX -= Math.cos(angle) * (15000 - distance) * 0.002;
-                velocityY -= Math.sin(angle) * (15000 - distance) * 0.002;
-            }
-        });
-
-        function animate() {
-            targetX += velocityX;
-            targetY += velocityY;
-
-            // Bounce on borders
-            const rect = title.getBoundingClientRect();
-            if (targetX < margin) {
-                targetX = margin;
-                velocityX *= -0.8; // bounce and lose a bit of speed
-            }
-            if (targetX + rect.width > window.innerWidth - margin) {
-                targetX = window.innerWidth - margin - rect.width;
-                velocityX *= -0.8;
-            }
-            if (targetY - rect.height < margin) {
-                targetY = margin + rect.height;
-                velocityY *= -0.8;
-            }
-            if (targetY > window.innerHeight - margin) {
-                targetY = window.innerHeight - margin;
-                velocityY *= -0.8;
-            }
-
-            // Soft movement toward target
-            currentX += (targetX - currentX) * easing;
-            currentY += (targetY - currentY) * easing;
-
-            title.style.left = `${currentX}px`;
-            title.style.top = `${currentY}px`;
-
-            requestAnimationFrame(animate);
-        }
-
-        function centerText() {
-            const rect = title.getBoundingClientRect();
-            targetX = window.clientWidth / 2 - rect.width / 2;
-            targetY = window.clientHeight / 2 - rect.height / 2;
-            currentX = targetX;
-            currentY = targetY;
-            title.style.left = `${currentX}px`;
-            title.style.top = `${currentY}px`;
-        }
-
-        window.addEventListener('resize', centerText);
-        centerText();
-        //animate();
-    </script>
+    <script src="/Scripts/home.js"></script>
 </body>
 
 </html>
