@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Converter ✈️</title>
+  <meta name="description"
+    content="Convert the height from which a carrot is dropped at the equator into it's velocity when reaching the ground, takes into account special relativity and universal gravitation, ignores air resistance" />
+  <link rel="stylesheet" href="/Style/global.css">
+</head>
+
+<body>
+  <div id="header-placeholder"></div>
+
+  <canvas id="animationCanvas"></canvas>
+  <div class="background" id="background"></div>
+  <main class="card" role="main">
+    <h1>Height ↔ carrot speed</h1>
+    <p class="lead">Enter an altitude and get the speed of a carrot when reaching the ground if dropped from that altitude at the equator, takes into account special relativity and universal gravitation, ignores air resistance</p>
+
+    <div class="converter">
+      <h1>Height Converter</h1>
+
+      <div class="converter-row">
+        <div class="field">
+          <label id="inputLabel">Altitude</label>
+          <div class="input-group">
+            <input type="text" pattern="[0-9 ]+" id="inputValue" placeholder="Enter value" />
+            <select id="inputUnit">
+              <option value="m">m</option>
+              <option value="km">km</option>
+              <option value="AU">Astronomical Unit</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <button id="invertBtn">⇄</button>
+
+      <div class="converter-row">
+        <div class="field">
+          <label id="outputLabel">Carrot's speed</label>
+          <div class="input-group">
+            <input type="text" id="outputValue" placeholder="Result" readonly />
+            <select id="outputUnit">
+              <option value="ms">m/s</option>
+              <option value="kmh">km/h</option>
+              <option value="mph">Miles/h</option>
+              <option value="fps">Feet/s</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="converter-actions">
+        <button id="copyBtn">Copy</button>
+        <button id="resetBtn">Reset</button>
+      </div>
+    </div>
+  </main>
+
+  <script src="/Scripts/header.js"></script>
+  <script src="/Scripts/convert_height_speed.js"></script>
+  <script src="/Scripts/animation.js"></script>
+</body>
+
+</html>
