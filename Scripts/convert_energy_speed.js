@@ -42,15 +42,17 @@
 
   // Invert everything
   invertBtn.addEventListener("click", () => {
+    const inputSelectedValue = inputUnit.value;
+    const outputSelectedValue = outputUnit.value;
+
     // swap full dropdown content
     const tempOptions = inputUnit.innerHTML;
     inputUnit.innerHTML = outputUnit.innerHTML;
     outputUnit.innerHTML = tempOptions;
 
     // swap selected index to keep consistent selection
-    const tempSelected = inputUnit.selectedIndex;
-    inputUnit.selectedIndex = outputUnit.selectedIndex;
-    outputUnit.selectedIndex = tempSelected;
+    inputUnit.value = outputSelectedValue;
+    outputUnit.value = inputSelectedValue;
 
     // swap labels
     const tempLabel = inputLabel.textContent;
