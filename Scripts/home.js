@@ -1,86 +1,121 @@
-const title = document.getElementById('title');
-const margin = 40; // soft margin from borders
+const avoider = document.getElementById('avoider');
 
-let targetX = 0;
-let targetY = 0;
-let currentX = targetX;
-let currentY = targetY;
-let velocityX = 0;
-let velocityY = 0;
-let xPos = -1;
-let yPos = -1;
-const easing = 0.02;
+// State (pos is offset FROM CENTER in px)
+let posX = 0, posY = 0;
+let vx = 0, vy = 0;
 
-document.addEventListener('mousemove', (e) => {
-    xPos = e.clientX;
-    yPos = e.clientY
-});
+// Mouse/touch location relative to center (initialized at 0 = center)
+let mouseX = 0, mouseY = 0;
 
+let centerX = window.innerWidth / 2;
+let centerY = window.innerHeight / 2;
+
+const AVOID_RADIUS = 200;      // px
+const MAX_AVOID_FORCE = 1.4;   // acceleration when very close
+const ATTRACTION = 0.0018;      // pull back to center when mouse far
+const FRICTION = 0.90;         // velocity damping each frame
+const MAX_SPEED = 60;          // px per frame clamp
+
+function getHalfSize() {
+  const r = avoider.getBoundingClientRect();
+  return [r.width / 2, r.height / 2]; // avoid zero
+}
+
+function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+
+function safeNormalize(dx, dy) {
+  const len = Math.hypot(dx, dy);
+  if (len < 1e-6) return [0, 0];
+  return [dx / len, dy / len];
+}
+
+// mouse events -> convert to coordinates relative to center
+window.addEventListener('mousemove', (e) => {
+  mouseX = e.clientX - centerX;
+  mouseY = e.clientY - centerY;
+}, {passive: true});
+
+// pointercapture/touch support
+window.addEventListener('touchmove', (e) => {
+  const t = e.touches[0];
+  if (t) {
+    mouseX = t.clientX - centerX;
+    mouseY = t.clientY - centerY;
+  }
+}, {passive: true});
+
+// animation loop
 function animate() {
-    console.log('animate ', targetX, targetY);
-    if (xPos == -1 || yPos == -1) {
-        requestAnimationFrame(animate);
-        return;
-    }
-    const rect = title.getBoundingClientRect();
+  // vector from mouse to element in center-based coords
+/*
+  const rect = avoider.getBoundingClientRect();
+  var dx = Math.max(rect.left - mouseX, 0, mouseX - rect.right);
+  var dy = Math.max(rect.top - mouseY, 0, mouseY - rect.bottom);
+  const dist = Math.hypot(dx, dy);
+  console.log(mouseX, mouseY, dx, dy);
+  console.log("oui");
+  */
+  let dx = posX - mouseX;
+  if (Math.abs(dx) < getHalfSize()[0]) dx = 0;
+  let dy = posY - mouseY;
+  if (Math.abs(dy) < getHalfSize()[1]) dy = 0;
+  const dist = Math.hypot(dx, dy);
 
-    const dx = xPos - (rect.left + rect.width / 2);
-    const dy = yPos - (rect.top + rect.height / 2);
-    const distance = Math.sqrt(dx * dx + dy * dy);
+  let ax = 0, ay = 0;
 
-    if (distance < 150) {
-        const angle = Math.atan2(dy, dx);
-        velocityX -= Math.cos(angle) * (150 - distance) * 0.002;
-        velocityY -= Math.sin(angle) * (150 - distance) * 0.002;
-    }
+  if (dist < AVOID_RADIUS && dist > 1e-6) {
+    // avoid: stronger the closer the pointer
+    const strength = (1 - dist / AVOID_RADIUS) * MAX_AVOID_FORCE;
+    const [nx, ny] = safeNormalize(dx, dy);
+    ax += nx * strength;
+    ay += ny * strength;
+  } else {
+    // gently pull back to center (posX/posY -> 0)
+    ax += -posX * ATTRACTION;
+    ay += -posY * ATTRACTION;
+  }
 
-    targetX += velocityX;
-    targetY += velocityY;
-    console.log("target1 ", targetX, targetY);
+  // integrate with friction
+  vx = vx * FRICTION + ax;
+  vy = vy * FRICTION + ay;
 
-    // Bounce on borders
-    if (targetX < margin) {
-        targetX = margin;
-        velocityX *= -0.8; // bounce and lose a bit of speed
-    }
-    if (targetX + rect.width > window.innerWidth - margin) {
-        targetX = window.innerWidth - margin - rect.width;
-        velocityX *= -0.8;
-    }
-    if (targetY - rect.height < margin) {
-        targetY = margin + rect.height;
-        velocityY *= -0.8;
-    }
-    if (targetY > window.innerHeight - margin) {
-        targetY = window.innerHeight - margin;
-        velocityY *= -0.8;
-    }
+  // speed clamp
+  const speed = Math.hypot(vx, vy);
+  if (speed > MAX_SPEED) {
+    vx = (vx / speed) * MAX_SPEED;
+    vy = (vy / speed) * MAX_SPEED;
+  }
 
-    console.log("target ", targetX, targetY);
-    // Soft movement toward target
-    currentX += (targetX - currentX) * easing;
-    currentY += (targetY - currentY) * easing;
+  posX += vx;
+  posY += vy;
 
+  // clamp so the element stays fully inside the viewport
+  // allowed offset on X is centerX - halfSize (positive to right), negative symmetrical
+  const boundX = Math.max(0, centerX - halfSize[0]);
+  const boundY = Math.max(0, centerY - halfSize[1]);
+  posX = clamp(posX, -boundX, boundX);
+  posY = clamp(posY, -boundY, boundY);
 
-    console.log('current ', currentX, currentY);
-    title.style.left = `${currentX}px`;
-    title.style.top = `${currentY}px`;
+  // safety: detect NaN or non-finite values and reset
+  if (!Number.isFinite(posX) || !Number.isFinite(posY)) {
+    console.warn('avoider detected invalid position — resetting to center');
+    posX = 0; posY = 0; vx = 0; vy = 0;
+  }
 
-    requestAnimationFrame(animate);
+  // apply to CSS variables (fast GPU transform path)
+  avoider.style.setProperty('--x', posX + 'px');
+  avoider.style.setProperty('--y', posY + 'px');
+
+  requestAnimationFrame(animate);
 }
 
-function centerText() {
-    const rect = title.getBoundingClientRect();
-    targetX = window.innerWidth / 2 - rect.width / 2;
-    targetY = window.innerHeight / 2 - rect.height / 2;
-    currentX = targetX;
-    currentY = targetY;
-    title.style.left = `${currentX}px`;
-    title.style.top = `${currentY}px`;
-}
-
-window.addEventListener('resize', centerText);
-document.addEventListener("DOMContentLoaded", () => {
-    centerText();
-    animate();
+// keep center and sizes correct on resize
+window.addEventListener('resize', () => {
+  centerX = window.innerWidth / 2;
+  centerY = window.innerHeight / 2;
+  halfSize = getHalfSize();
 });
+
+// start
+let halfSize = getHalfSize();
+requestAnimationFrame(animate);
