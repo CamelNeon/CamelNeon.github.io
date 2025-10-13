@@ -1,14 +1,16 @@
 :root {
     --x: 0px;
     --y: 0px;
+    --rot: 0deg;
   }
 
   #avoider {
     position: fixed;
     left: 50%;
     top: 50%;
-    transform: translate(-50%, -50%) translate3d(var(--x), var(--y), 0);
+    transform: translate(-50%, -50%) translate3d(var(--x), var(--y), 0) rotate(var(--rot));;
     will-change: transform;
+    transform-style: preserve-3d;
     pointer-events: none; /* optional: allows pointer to reach underlying elements */
     touch-action: none;
     font-size: 5rem;
