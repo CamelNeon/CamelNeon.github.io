@@ -201,3 +201,10 @@ button.ghost {
   font-size: 1rem;
   cursor: pointer;
 }
+
+.plane {
+  position: absolute;
+  width: 100px;
+  height: auto;
+  transition: left linear;
+}
