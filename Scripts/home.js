@@ -18,7 +18,7 @@ let centerY = window.innerHeight / 2;
 // --- Physics Constants ---
 const AVOID_RADIUS = 180;      // px
 const MAX_AVOID_FORCE = 1.0;   // acceleration when very close
-const ATTRACTION = 0.005;      // pull back to center when mouse far
+const ATTRACTION = 0.003;      // pull back to center when mouse far
 const FRICTION = 0.90;         // velocity damping each frame
 const MAX_SPEED = 60;          // px per frame clamp
 
