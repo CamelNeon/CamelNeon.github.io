@@ -22,8 +22,9 @@ jobs:
           npm install
           npm run build
           
-          cp -r dist/* deploy/noteblock-studio/
+          cp -r dist/* ./deploy/noteblock-studio/
           
+          cd ..
           cp index.html deploy/ 2>/dev/null || true
           cp -r assets deploy/ 2>/dev/null || true
         env:
