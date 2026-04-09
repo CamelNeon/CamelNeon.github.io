@@ -17,6 +17,7 @@ jobs:
 
       - name: Install and Build
         run: |
+          cd noteblock-studio
           npm install
           npm run build
 
