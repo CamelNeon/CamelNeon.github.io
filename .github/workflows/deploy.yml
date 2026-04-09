@@ -26,6 +26,7 @@ jobs:
           cp -r noteblock-studio/dist/* deploy/noteblock-studio/
           
           cp index.html deploy/ 2>/dev/null || true
+          cp CNAME deploy/ 2>/dev/null || true
           cp -r assets deploy/ 2>/dev/null || true
         env:
           CI: false 
