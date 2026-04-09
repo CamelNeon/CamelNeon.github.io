@@ -12,17 +12,29 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout 🛎️
         uses: actions/checkout@v4
 
-      - name: Install and Build
+      - name: Install and Build 🔧
         run: |
-          mkdir dist
-          cd noteblock-studio
           npm install
           npm run build
+        env:
+          # This ensures that the build doesn't fail on warnings if you have any
+          CI: false 
 
-      - name: Deploy
+      - name: Debug 🔍
+        run: |
+          echo "Checking if dist exists..."
+          ls -la
+          if [ -d "dist" ]; then
+            echo "dist directory found!"
+            ls -la dist
+          else
+            echo "dist directory NOT found!"
+          fi
+
+      - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: .
