@@ -17,23 +17,17 @@ jobs:
 
       - name: Install and Build 🔧
         run: |
+          mkdir -p deploy/noteblock-studio
           cd noteblock-studio
           npm install
           npm run build
+          
+          cp -r dist/* deploy/noteblock-studio/
+          
+          cp index.html deploy/ 2>/dev/null || true
+          cp -r assets deploy/ 2>/dev/null || true
         env:
-          # This ensures that the build doesn't fail on warnings if you have any
           CI: false 
-
-      - name: Debug 🔍
-        run: |
-          echo "Checking if dist exists..."
-          ls -la
-          if [ -d "dist" ]; then
-            echo "dist directory found!"
-            ls -la dist
-          else
-            echo "dist directory NOT found!"
-          fi
 
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4
