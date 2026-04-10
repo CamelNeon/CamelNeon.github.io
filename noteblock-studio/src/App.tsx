@@ -361,6 +361,66 @@ export default function App() {
     return blueprint;
   };
 
+  const exportSong = () => {
+    const data = JSON.stringify(song, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${song.name.replace(/\s+/g, '_')}.nbs.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const importSong = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const content = event.target?.result as string;
+        const importedSong = JSON.parse(content) as Song;
+        
+        // Basic validation
+        if (importedSong.notes && Array.isArray(importedSong.notes) && importedSong.layers) {
+          setSong(importedSong);
+          currentTickRef.current = 0;
+          if (cursorRef.current) cursorRef.current.style.left = '0px';
+          if (tickDisplayRef.current) tickDisplayRef.current.textContent = '0';
+        } else {
+          alert("Invalid song file format.");
+        }
+      } catch (error) {
+        console.error("Import failed:", error);
+        alert("Failed to import song. Make sure it's a valid JSON file.");
+      }
+    };
+    reader.readAsText(file);
+    // Reset input
+    e.target.value = '';
+  };
+
+  const downloadBlueprintAsText = () => {
+    const text = generateBlueprint();
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${song.name.replace(/\s+/g, '_')}_blueprint.txt`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const copyBlueprintToClipboard = () => {
+    const text = generateBlueprint();
+    navigator.clipboard.writeText(text).then(() => {
+      alert("Blueprint copied to clipboard!");
+    }).catch(err => {
+      console.error('Could not copy text: ', err);
+    });
+  };
+
   const clearSong = () => {
     setSong(DEFAULT_SONG);
     currentTickRef.current = 0;
@@ -409,15 +469,46 @@ export default function App() {
               <Trash2 className="w-5 h-5" />
             </Button>
             <div className="w-px h-6 bg-white/10 mx-1" />
-            <Button variant="ghost" size="icon" onClick={() => {}} className="text-white/60 hover:text-white hover:bg-white/5">
-              <Save className="w-5 h-5" />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={() => {}} className="text-white/60 hover:text-white hover:bg-white/5">
-              <Download className="w-5 h-5" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={exportSong} 
+                  className="text-white/60 hover:text-white hover:bg-white/5"
+                >
+                  <Save className="w-5 h-5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Export Song (JSON)</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="relative">
+                  <input
+                    type="file"
+                    accept=".json"
+                    onChange={importSong}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                    title="Import Song"
+                  />
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="text-white/60 hover:text-white hover:bg-white/5"
+                  >
+                    <Download className="w-5 h-5" />
+                  </Button>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>Import Song (JSON)</TooltipContent>
+            </Tooltip>
             <Dialog>
-              <DialogTrigger render={<Button variant="ghost" size="icon" className="text-white/60 hover:text-white hover:bg-white/5" />}>
-                <Settings className="w-5 h-5" />
+              <DialogTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-white/60 hover:text-white hover:bg-white/5">
+                  <Settings className="w-5 h-5" />
+                </Button>
               </DialogTrigger>
               <DialogContent className="bg-[#1a1a1a] border-white/10 text-white">
                 <DialogHeader>
@@ -684,25 +775,49 @@ export default function App() {
 
         {/* Blueprint Dialog */}
         <Dialog open={showBlueprint} onOpenChange={setShowBlueprint}>
-          <DialogContent className="bg-[#1a1a1a] border-white/10 text-white max-w-2xl max-h-[80vh] flex flex-col">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Box className="w-5 h-5 text-green-500" />
+          <DialogContent className="bg-[#1a1a1a] border-white/10 text-white max-w-2xl h-[80vh] flex flex-col p-0 overflow-hidden">
+            <DialogHeader className="p-6 pb-2">
+              <DialogTitle className="flex items-center gap-2 text-xl">
+                <Box className="w-6 h-6 text-green-500" />
                 Minecraft Build Blueprint
               </DialogTitle>
             </DialogHeader>
-            <ScrollArea className="flex-1 mt-4 rounded-lg bg-black/40 p-4 font-mono text-sm border border-white/5">
-              <pre className="whitespace-pre-wrap text-green-400/90">
-                {generateBlueprint()}
-              </pre>
-            </ScrollArea>
-            <DialogFooter className="mt-6">
-              <Button variant="outline" onClick={() => setShowBlueprint(false)} className="border-white/10 hover:bg-white/5">
-                Close
-              </Button>
-              <Button className="bg-green-600 hover:bg-green-700">
+            
+            <div className="flex-1 overflow-hidden px-6">
+              <ScrollArea className="h-full w-full rounded-xl bg-black/40 border border-white/5">
+                <div className="p-6">
+                  <pre className="whitespace-pre-wrap text-green-400/90 font-mono text-sm leading-relaxed">
+                    {generateBlueprint()}
+                  </pre>
+                </div>
+                <ScrollBar orientation="vertical" className="bg-white/5" />
+              </ScrollArea>
+            </div>
+
+            <DialogFooter className="p-6 pt-4 bg-black/20 border-t border-white/5 flex items-center justify-between gap-4">
+              <div className="flex gap-2">
+                <Button 
+                  variant="ghost" 
+                  onClick={() => setShowBlueprint(false)} 
+                  className="text-white/60 hover:text-white hover:bg-white/5 border border-white/10"
+                >
+                  Close
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={downloadBlueprintAsText}
+                  className="text-white/60 hover:text-white border-white/10 hover:bg-white/5"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Download .txt
+                </Button>
+              </div>
+              <Button 
+                onClick={copyBlueprintToClipboard}
+                className="bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-900/20 px-8"
+              >
                 <Download className="w-4 h-4 mr-2" />
-                Export as Text
+                Copy to Clipboard
               </Button>
             </DialogFooter>
           </DialogContent>
