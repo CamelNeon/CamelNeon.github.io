@@ -9,7 +9,7 @@ import {
   Play, 
   Pause, 
   Square, 
-  Plus, 
+  Plus, d
   Trash2, 
   Download, 
   Music, 
@@ -70,86 +70,221 @@ const DEFAULT_SONG: Song = {
 };
 
 const GRID_SIZE = 40;
-const VISIBLE_TICKS = 64;
+const EMPTY_ARRAY: Note[] = [];
+
+const GridCell = React.memo(({ 
+  tick, 
+  pitch, 
+  notes, 
+  selectedLayer, 
+  onAddNote 
+}: { 
+  tick: number, 
+  pitch: number, 
+  notes: Note[], 
+  selectedLayer: number,
+  onAddNote: (tick: number, pitch: number) => void
+}) => {
+  const currentLayerNote = notes.find(n => n.layer === selectedLayer);
+  const otherLayersNotes = notes.filter(n => n.layer !== selectedLayer);
+  
+  const displayNote = currentLayerNote || otherLayersNotes[0];
+  const inst = displayNote ? INSTRUMENTS.find(ins => ins.type === displayNote.instrument) : null;
+  const isGhost = !currentLayerNote && otherLayersNotes.length > 0;
+
+  return (
+    <div
+      onClick={() => onAddNote(tick, pitch)}
+      className={cn(
+        "flex-shrink-0 border-r border-b border-white/5 cursor-crosshair transition-colors group relative",
+        tick % 4 === 0 ? "bg-white/[0.02]" : ""
+      )}
+      style={{ width: GRID_SIZE }}
+    >
+      {displayNote && (
+        <motion.div
+          initial={{ scale: 0.5, opacity: 0 }}
+          animate={{ scale: 1, opacity: isGhost ? 0.3 : 1 }}
+          className="w-full h-full p-1"
+        >
+          <div 
+            className="w-full h-full rounded shadow-lg flex items-center justify-center relative"
+            style={{ backgroundColor: inst?.color || '#fff' }}
+          >
+            {notes.length > 1 && (
+              <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-white rounded-full border border-black/20 z-20" />
+            )}
+            <div className="w-1 h-1 bg-black/20 rounded-full" />
+          </div>
+        </motion.div>
+      )}
+      {!displayNote && (
+        <div className="w-full h-full opacity-0 group-hover:opacity-100 bg-white/5 flex items-center justify-center">
+          <div className="w-1 h-1 bg-white/20 rounded-full" />
+        </div>
+      )}
+    </div>
+  );
+});
+
+GridCell.displayName = 'GridCell';
 
 export default function App() {
   const [song, setSong] = useState<Song>(DEFAULT_SONG);
-  const [currentTick, setCurrentTick] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [selectedInstrument, setSelectedInstrument] = useState<InstrumentType>('harp');
   const [selectedLayer, setSelectedLayer] = useState(0);
   const [showBlueprint, setShowBlueprint] = useState(false);
   const [showClearDialog, setShowClearDialog] = useState(false);
+  const [visibleRange, setVisibleRange] = useState({ start: 0, end: 32 });
 
   const playbackRef = useRef<number | null>(null);
-  const lastTickRef = useRef(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const cursorRef = useRef<HTMLDivElement>(null);
+  const tickDisplayRef = useRef<HTMLSpanElement>(null);
+  const currentTickRef = useRef(0);
+
+  // Pre-calculate note map for O(1) lookup
+  const noteMap = React.useMemo(() => {
+    const map: Record<string, Note[]> = {};
+    song.notes.forEach(note => {
+      const key = `${note.tick}-${note.pitch}`;
+      if (!map[key]) map[key] = [];
+      map[key].push(note);
+    });
+    return map;
+  }, [song.notes]);
+
+  // Pre-calculate notes by tick for playback
+  const notesByTick = React.useMemo(() => {
+    const map: Record<number, Note[]> = {};
+    song.notes.forEach(note => {
+      if (!map[note.tick]) map[note.tick] = [];
+      map[note.tick].push(note);
+    });
+    return map;
+  }, [song.notes]);
+
+  const getNotesAt = useCallback((tick: number, pitch: number) => {
+    return noteMap[`${tick}-${pitch}`] || EMPTY_ARRAY;
+  }, [noteMap]);
+
+  // Update visible range on scroll
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      const start = Math.floor(container.scrollLeft / GRID_SIZE);
+      const count = Math.ceil(container.clientWidth / GRID_SIZE);
+      setVisibleRange({ 
+        start: Math.max(0, start - 5), 
+        end: Math.min(1000, start + count + 5) 
+      });
+    };
+
+    container.addEventListener('scroll', handleScroll);
+    // Initial calculation
+    handleScroll();
+    
+    const resizeObserver = new ResizeObserver(handleScroll);
+    resizeObserver.observe(container);
+
+    return () => {
+      container.removeEventListener('scroll', handleScroll);
+      resizeObserver.disconnect();
+    };
+  }, []);
 
   // Initialize audio on first interaction
   const initAudio = async () => {
     await audioService.init();
   };
 
+  const stopPlayback = useCallback(() => {
+    if (playbackRef.current) clearInterval(playbackRef.current);
+    setIsPlaying(false);
+    currentTickRef.current = 0;
+    if (cursorRef.current) cursorRef.current.style.left = '0px';
+    if (tickDisplayRef.current) tickDisplayRef.current.textContent = '0';
+  }, []);
+
   const togglePlay = async () => {
     if (!isPlaying) {
       await initAudio();
       setIsPlaying(true);
-      Tone.Transport.bpm.value = song.tempo * 60 / 4; // Convert ticks to BPM (assuming 4 ticks per beat)
-      // Actually, it's easier to use a custom loop for ticks
-      const tickDuration = 1 / song.tempo;
       
-      let tick = currentTick;
       playbackRef.current = window.setInterval(() => {
-        setCurrentTick(tick);
+        const next = currentTickRef.current + 1;
+        currentTickRef.current = next;
+
+        if (next >= 1000) {
+          stopPlayback();
+          return;
+        }
+        
+        // Update DOM directly for performance
+        if (cursorRef.current) {
+          cursorRef.current.style.left = `${next * GRID_SIZE}px`;
+        }
+        if (tickDisplayRef.current) {
+          tickDisplayRef.current.textContent = next.toString();
+        }
+        
         // Play notes at this tick
-        song.notes.filter(n => n.tick === tick).forEach(n => {
+        const notesAtTick = notesByTick[next] || [];
+        notesAtTick.forEach(n => {
           const layer = song.layers.find(l => l.id === n.layer);
           if (layer && !layer.muted) {
             audioService.playNote(n.instrument, n.pitch);
           }
         });
-        tick++;
-        lastTickRef.current = tick;
-      }, tickDuration * 1000);
+        
+        // Auto-scroll
+        if (scrollContainerRef.current) {
+          const container = scrollContainerRef.current;
+          const scrollLeft = container.scrollLeft;
+          const width = container.clientWidth;
+          const cursorX = next * GRID_SIZE;
+          
+          if (cursorX > scrollLeft + width - 100) {
+            container.scrollLeft = cursorX - 100;
+          }
+        }
+      }, 1000 / song.tempo);
     } else {
-      if (playbackRef.current) clearInterval(playbackRef.current);
-      setIsPlaying(false);
+      stopPlayback();
     }
   };
 
-  const stopPlayback = () => {
-    if (playbackRef.current) clearInterval(playbackRef.current);
-    setIsPlaying(false);
-    setCurrentTick(0);
-    lastTickRef.current = 0;
-  };
-
-  const addNote = async (tick: number, pitch: number) => {
+  const addNote = useCallback(async (tick: number, pitch: number) => {
     try {
       await initAudio();
-      const existingNoteIndex = song.notes.findIndex(n => n.tick === tick && n.pitch === pitch && n.layer === selectedLayer);
-      
-      if (existingNoteIndex >= 0) {
-        // Remove note
-        const newNotes = [...song.notes];
-        newNotes.splice(existingNoteIndex, 1);
-        setSong({ ...song, notes: newNotes });
-      } else {
-        // Add note
-        const newNote: Note = {
-          id: Math.random().toString(36).substr(2, 9),
-          instrument: selectedInstrument,
-          pitch,
-          tick,
-          layer: selectedLayer
-        };
-        setSong({ ...song, notes: [...song.notes, newNote] });
-        audioService.playNote(selectedInstrument, pitch);
-      }
+      setSong(prev => {
+        const existingNoteIndex = prev.notes.findIndex(n => n.tick === tick && n.pitch === pitch && n.layer === selectedLayer);
+        
+        if (existingNoteIndex >= 0) {
+          // Remove note
+          const newNotes = [...prev.notes];
+          newNotes.splice(existingNoteIndex, 1);
+          return { ...prev, notes: newNotes };
+        } else {
+          // Add note
+          const newNote: Note = {
+            id: Math.random().toString(36).substr(2, 9),
+            instrument: selectedInstrument,
+            pitch,
+            tick,
+            layer: selectedLayer
+          };
+          audioService.playNote(selectedInstrument, pitch);
+          return { ...prev, notes: [...prev.notes, newNote] };
+        }
+      });
     } catch (error) {
       console.error("Failed to add note:", error);
     }
-  };
+  }, [selectedInstrument, selectedLayer]);
 
   const addLayer = () => {
     const newId = song.layers.length > 0 ? Math.max(...song.layers.map(l => l.id)) + 1 : 0;
@@ -169,17 +304,6 @@ export default function App() {
       ...song,
       layers: song.layers.map(l => l.id === id ? { ...l, muted: !l.muted } : l)
     });
-  };
-
-  const getNoteAt = (tick: number, pitch: number, layerId?: number) => {
-    if (layerId !== undefined) {
-      return song.notes.find(n => n.tick === tick && n.pitch === pitch && n.layer === layerId);
-    }
-    return song.notes.find(n => n.tick === tick && n.pitch === pitch);
-  };
-
-  const getNotesAt = (tick: number, pitch: number) => {
-    return song.notes.filter(n => n.tick === tick && n.pitch === pitch);
   };
 
   const generateBlueprint = () => {
@@ -238,7 +362,9 @@ export default function App() {
 
   const clearSong = () => {
     setSong(DEFAULT_SONG);
-    setCurrentTick(0);
+    currentTickRef.current = 0;
+    if (cursorRef.current) cursorRef.current.style.left = '0px';
+    if (tickDisplayRef.current) tickDisplayRef.current.textContent = '0';
     setShowClearDialog(false);
   };
 
@@ -255,20 +381,7 @@ export default function App() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isPlaying, song.tempo, currentTick]);
-
-  // Auto-scroll during playback
-  useEffect(() => {
-    if (isPlaying && scrollContainerRef.current) {
-      const scrollX = currentTick * GRID_SIZE;
-      const container = scrollContainerRef.current;
-      const visibleWidth = container.clientWidth;
-      
-      if (scrollX > container.scrollLeft + visibleWidth - 100) {
-        container.scrollTo({ left: scrollX - visibleWidth + 200, behavior: 'smooth' });
-      }
-    }
-  }, [currentTick, isPlaying]);
+  }, [isPlaying, song.tempo, togglePlay, stopPlayback]);
 
   return (
     <TooltipProvider>
@@ -442,7 +555,7 @@ export default function App() {
               <div className="w-px h-8 bg-white/10 mx-2" />
               <div className="px-4 flex flex-col items-center">
                 <span className="text-[10px] font-bold text-white/30 uppercase tracking-tighter">Tick</span>
-                <span className="text-xl font-mono font-bold tabular-nums">{currentTick}</span>
+                <span ref={tickDisplayRef} className="text-xl font-mono font-bold tabular-nums">0</span>
               </div>
               <div className="w-px h-8 bg-white/10 mx-2" />
               <Button 
@@ -463,19 +576,28 @@ export default function App() {
                     <div className="w-16 flex-shrink-0 border-r border-white/10 flex items-center justify-center text-[10px] font-bold text-white/30 uppercase sticky left-0 z-40 bg-[#121212]">
                       Pitch
                     </div>
-                    <div className="flex">
-                      {Array.from({ length: 1000 }).map((_, i) => (
-                        <div 
-                          key={i} 
-                          className={cn(
-                            "flex-shrink-0 flex items-center justify-center text-[10px] font-mono border-r border-white/5 h-10",
-                            i % 4 === 0 ? "text-white/60 bg-white/5" : "text-white/20"
-                          )}
-                          style={{ width: GRID_SIZE }}
-                        >
-                          {i}
-                        </div>
-                      ))}
+                    <div className="flex relative h-10">
+                      {/* Spacer to maintain width */}
+                      <div style={{ width: 1000 * GRID_SIZE }} className="absolute inset-0 pointer-events-none" />
+                      
+                      {/* Visible Ticks */}
+                      <div className="flex absolute top-0" style={{ left: visibleRange.start * GRID_SIZE }}>
+                        {Array.from({ length: visibleRange.end - visibleRange.start }).map((_, i) => {
+                          const tick = visibleRange.start + i;
+                          return (
+                            <div 
+                              key={tick} 
+                              className={cn(
+                                "flex-shrink-0 flex items-center justify-center text-[10px] font-mono border-r border-white/5 h-10",
+                                tick % 4 === 0 ? "text-white/60 bg-white/5" : "text-white/20"
+                              )}
+                              style={{ width: GRID_SIZE }}
+                            >
+                              {tick}
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
 
@@ -497,7 +619,7 @@ export default function App() {
                     </div>
 
                     {/* Note Grid */}
-                    <div className="relative">
+                    <div className="relative flex-1">
                       {/* Grid Lines Background */}
                       <div 
                         className="absolute inset-0 pointer-events-none"
@@ -506,16 +628,16 @@ export default function App() {
                             linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
                             linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px)
                           `,
-                          backgroundSize: `${GRID_SIZE}px 40px`
+                          backgroundSize: `${GRID_SIZE}px 40px`,
+                          width: 1000 * GRID_SIZE
                         }}
                       />
 
                       {/* Playback Cursor */}
-                      <motion.div 
-                        className="absolute top-0 bottom-0 w-1 bg-green-500 z-10 shadow-[0_0_15px_rgba(34,197,94,0.5)]"
-                        style={{ left: currentTick * GRID_SIZE }}
-                        animate={{ left: currentTick * GRID_SIZE }}
-                        transition={{ type: "tween", ease: "linear", duration: 0 }}
+                      <div 
+                        ref={cursorRef}
+                        className="absolute top-0 bottom-0 w-1 bg-green-500 z-10 shadow-[0_0_15px_rgba(34,197,94,0.5)] transition-[left]"
+                        style={{ left: 0, transitionDuration: '0ms' }}
                       />
 
                       {/* Interactive Grid Cells */}
@@ -523,52 +645,28 @@ export default function App() {
                         {Array.from({ length: MAX_PITCH - MIN_PITCH + 1 }).map((_, i) => {
                           const pitch = MAX_PITCH - i;
                           return (
-                            <div key={pitch} className="flex h-10">
-                                {Array.from({ length: 1000 }).map((_, j) => {
-                                  const tick = j;
-                                  const notes = getNotesAt(tick, pitch);
-                                  const currentLayerNote = notes.find(n => n.layer === selectedLayer);
-                                  const otherLayersNotes = notes.filter(n => n.layer !== selectedLayer);
-                                  
-                                  const displayNote = currentLayerNote || otherLayersNotes[0];
-                                  const inst = displayNote ? INSTRUMENTS.find(ins => ins.type === displayNote.instrument) : null;
-                                  const isGhost = !currentLayerNote && otherLayersNotes.length > 0;
-                                  
-                                  return (
-                                    <div
-                                      key={tick}
-                                      onClick={() => addNote(tick, pitch)}
-                                      className={cn(
-                                        "flex-shrink-0 border-r border-b border-white/5 cursor-crosshair transition-colors group relative",
-                                        tick % 4 === 0 ? "bg-white/[0.02]" : ""
-                                      )}
-                                      style={{ width: GRID_SIZE }}
-                                    >
-                                      {displayNote && (
-                                        <motion.div
-                                          initial={{ scale: 0.5, opacity: 0 }}
-                                          animate={{ scale: 1, opacity: isGhost ? 0.3 : 1 }}
-                                          className="w-full h-full p-1"
-                                        >
-                                          <div 
-                                            className="w-full h-full rounded shadow-lg flex items-center justify-center relative"
-                                            style={{ backgroundColor: inst?.color || '#fff' }}
-                                          >
-                                            {notes.length > 1 && (
-                                              <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-white rounded-full border border-black/20 z-20" />
-                                            )}
-                                            <div className="w-1 h-1 bg-black/20 rounded-full" />
-                                          </div>
-                                        </motion.div>
-                                      )}
-                                      {!displayNote && (
-                                        <div className="w-full h-full opacity-0 group-hover:opacity-100 bg-white/5 flex items-center justify-center">
-                                          <div className="w-1 h-1 bg-white/20 rounded-full" />
-                                        </div>
-                                      )}
-                                    </div>
-                                  );
-                                })}
+                            <div key={pitch} className="flex h-10 relative">
+                                {/* Spacer to maintain width */}
+                                <div style={{ width: 1000 * GRID_SIZE }} className="flex-shrink-0 h-full pointer-events-none" />
+                                
+                                {/* Visible Cells */}
+                                <div className="flex absolute top-0" style={{ left: visibleRange.start * GRID_SIZE }}>
+                                  {Array.from({ length: visibleRange.end - visibleRange.start }).map((_, j) => {
+                                    const tick = visibleRange.start + j;
+                                    const notes = getNotesAt(tick, pitch);
+                                    
+                                    return (
+                                      <GridCell
+                                        key={tick}
+                                        tick={tick}
+                                        pitch={pitch}
+                                        notes={notes}
+                                        selectedLayer={selectedLayer}
+                                        onAddNote={addNote}
+                                      />
+                                    );
+                                  })}
+                                </div>
                             </div>
                           );
                         })}
