@@ -1,3 +1,7 @@
+:root {
+  --header-height: 80px;
+}
+
 header {
     position: fixed;
     top: 0;
@@ -5,7 +9,7 @@ header {
     width: 100%;
     background: rgba(0, 0, 50, 0.8);
     color: white;
-    height: 80px;
+    height: var(--header-height);
     z-index: 1000;
     transition: top 0.3s;
     display: flex;
