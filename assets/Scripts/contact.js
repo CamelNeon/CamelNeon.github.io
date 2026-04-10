@@ -1,68 +1,82 @@
-const text = document.getElementById('wordart');
-        let x = Math.random() * (window.innerWidth - 400);
-        let y = Math.random() * (window.innerHeight - 100);
-        let dx = 3;
-        let dy = 3;
-        const speed = 3;
+const wordart = document.getElementById('wordart');
+const HEADER_HEIGHT = 80;
 
-        // 1. DVD Bounce Animation
-        function animate() {
-            const rect = text.getBoundingClientRect();
-            
-            if (x + rect.width >= window.innerWidth || x <= 0) {
-                dx = -dx;
-                changeColor();
-            }
-            if (y + rect.height >= window.innerHeight || y <= 0) {
-                dy = -dy;
-                changeColor();
-            }
+let rect = wordart.getBoundingClientRect();
+let x = Math.random() * (window.innerWidth - rect.width);
+let y = Math.random() * (window.innerHeight - rect.height - HEADER_HEIGHT) + HEADER_HEIGHT;
 
-            x += dx;
-            y += dy;
+let dx = 4; // Horizontal speed
+let dy = 4; // Vertical speed
 
-            text.style.left = x + 'px';
-            text.style.top = y + 'px';
+function update() {
+    rect = wordart.getBoundingClientRect();
+    
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
 
-            requestAnimationFrame(animate);
-        }
+    // Bounce off Right/Left
+    if (x + rect.width >= screenWidth || x <= 0) {
+        dx = -dx;
+        randomColor();
+    }
 
-        function changeColor() {
-            // Randomly rotate hue on bounce
-            text.style.filter = `drop-shadow(5px 5px 0px #000) hue-rotate(${Math.random() * 360}deg)`;
-        }
+    // Bounce off Bottom/Top (taking header into account)
+    if (y + rect.height >= screenHeight) {
+        dy = -dy;
+        y = screenHeight - rect.height; // Snap to bottom to prevent sticking
+        randomColor();
+    } else if (y <= HEADER_HEIGHT) {
+        dy = -dy;
+        y = HEADER_HEIGHT; // Snap to header bottom
+        randomColor();
+    }
 
-        // 2. The "Escape" Logic (Moves away when mouse gets close)
-        document.addEventListener('mousemove', (e) => {
-            const mouseX = e.clientX;
-            const mouseY = e.clientY;
-            const textRect = text.getBoundingClientRect();
-            const textCenterX = textRect.left + textRect.width / 2;
-            const textCenterY = textRect.top + textRect.height / 2;
+    x += dx;
+    y += dy;
 
-            const distance = Math.hypot(mouseX - textCenterX, mouseY - textCenterY);
+    wordart.style.left = x + 'px';
+    wordart.style.top = y + 'px';
 
-            if (distance < 150) {
-                // Teleport to a random location
-                x = Math.random() * (window.innerWidth - textRect.width);
-                y = Math.random() * (window.innerHeight - textRect.height);
-                text.classList.add('pulse');
-                setTimeout(() => text.classList.remove('pulse'), 500);
-            }
-        });
+    requestAnimationFrame(update);
+}
 
-        // 3. Spawning "NO" on click
-        document.addEventListener('click', (e) => {
-            const no = document.createElement('div');
-            no.className = 'no-popup';
-            no.innerText = 'NO! 🛑';
-            no.style.left = e.clientX + 'px';
-            no.style.top = e.clientY + 'px';
-            document.body.appendChild(no);
+function randomColor() {
+    const hue = Math.floor(Math.random() * 360);
+    wordart.style.filter = `drop-shadow(4px 4px 0px #000) hue-rotate(${hue}deg)`;
+}
 
-            // Remove element after animation
-            setTimeout(() => no.remove(), 1000);
-        });
+// Escape logic: Move away if mouse gets close
+document.addEventListener('mousemove', (e) => {
+    const mouseX = e.clientX;
+    const mouseY = e.clientY;
+    
+    const centerX = x + rect.width / 2;
+    const centerY = y + rect.height / 2;
+    
+    const distance = Math.hypot(mouseX - centerX, mouseY - centerY);
 
-        // Start the bounce
-        animate();
+    if (distance < 150) {
+        // Teleport to a safe random spot
+        x = Math.random() * (window.innerWidth - rect.width);
+        y = Math.random() * (window.innerHeight - rect.height - HEADER_HEIGHT) + HEADER_HEIGHT;
+    }
+});
+
+// Click "NO" effect
+document.addEventListener('mousedown', (e) => {
+    const no = document.createElement('div');
+    no.className = 'no-popup';
+    no.innerText = 'STAY AWAY!';
+    no.style.left = e.clientX + 'px';
+    no.style.top = e.clientY + 'px';
+    document.body.appendChild(no);
+    setTimeout(() => no.remove(), 800);
+});
+
+// Re-calculate on resize
+window.addEventListener('resize', () => {
+    rect = wordart.getBoundingClientRect();
+});
+
+// Start the loop
+update();
