@@ -9,7 +9,7 @@ import {
   Play, 
   Pause, 
   Square, 
-  Plus, d
+  Plus, 
   Trash2, 
   Download, 
   Music, 
@@ -69,7 +69,8 @@ const DEFAULT_SONG: Song = {
   ]
 };
 
-const GRID_SIZE = 40;
+const GRID_SIZE = 64;
+const CELL_HEIGHT = 48;
 const EMPTY_ARRAY: Note[] = [];
 
 const GridCell = React.memo(({ 
@@ -96,7 +97,7 @@ const GridCell = React.memo(({
     <div
       onClick={() => onAddNote(tick, pitch)}
       className={cn(
-        "flex-shrink-0 border-r border-b border-white/5 cursor-crosshair transition-colors group relative",
+        "flex-shrink-0 border-r border-b border-white/5 cursor-crosshair transition-colors group relative h-full",
         tick % 4 === 0 ? "bg-white/[0.02]" : ""
       )}
       style={{ width: GRID_SIZE }}
@@ -570,13 +571,13 @@ export default function App() {
             {/* Grid Editor */}
             <div className="flex-1 overflow-hidden flex flex-col relative bg-[#1a1a1a]">
               <ScrollArea className="h-full w-full" viewportRef={scrollContainerRef}>
-                <div className="relative" style={{ width: 1000 * GRID_SIZE, height: (MAX_PITCH - MIN_PITCH + 1) * 40 }}>
+                <div className="relative" style={{ width: 1000 * GRID_SIZE, height: (MAX_PITCH - MIN_PITCH + 1) * CELL_HEIGHT }}>
                   {/* Timeline Header (Sticky Top) */}
                   <div className="flex sticky top-0 z-30 bg-[#121212] border-b border-white/10">
                     <div className="w-16 flex-shrink-0 border-r border-white/10 flex items-center justify-center text-[10px] font-bold text-white/30 uppercase sticky left-0 z-40 bg-[#121212]">
                       Pitch
                     </div>
-                    <div className="flex relative h-10">
+                    <div className="flex relative h-12">
                       {/* Spacer to maintain width */}
                       <div style={{ width: 1000 * GRID_SIZE }} className="absolute inset-0 pointer-events-none" />
                       
@@ -588,7 +589,7 @@ export default function App() {
                             <div 
                               key={tick} 
                               className={cn(
-                                "flex-shrink-0 flex items-center justify-center text-[10px] font-mono border-r border-white/5 h-10",
+                                "flex-shrink-0 flex items-center justify-center text-[10px] font-mono border-r border-white/5 h-12",
                                 tick % 4 === 0 ? "text-white/60 bg-white/5" : "text-white/20"
                               )}
                               style={{ width: GRID_SIZE }}
@@ -610,7 +611,7 @@ export default function App() {
                         return (
                           <div 
                             key={pitch} 
-                            className="h-10 flex items-center justify-center text-[10px] font-bold border-b border-white/5 bg-[#121212]"
+                            className="h-12 flex items-center justify-center text-[10px] font-bold border-b border-white/5 bg-[#121212]"
                           >
                             {pitch}
                           </div>
@@ -628,7 +629,7 @@ export default function App() {
                             linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
                             linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px)
                           `,
-                          backgroundSize: `${GRID_SIZE}px 40px`,
+                          backgroundSize: `${GRID_SIZE}px ${CELL_HEIGHT}px`,
                           width: 1000 * GRID_SIZE
                         }}
                       />
@@ -645,12 +646,12 @@ export default function App() {
                         {Array.from({ length: MAX_PITCH - MIN_PITCH + 1 }).map((_, i) => {
                           const pitch = MAX_PITCH - i;
                           return (
-                            <div key={pitch} className="flex h-10 relative">
+                            <div key={pitch} className="flex h-12 relative">
                                 {/* Spacer to maintain width */}
                                 <div style={{ width: 1000 * GRID_SIZE }} className="flex-shrink-0 h-full pointer-events-none" />
                                 
                                 {/* Visible Cells */}
-                                <div className="flex absolute top-0" style={{ left: visibleRange.start * GRID_SIZE }}>
+                                <div className="flex absolute top-0 h-full" style={{ left: visibleRange.start * GRID_SIZE }}>
                                   {Array.from({ length: visibleRange.end - visibleRange.start }).map((_, j) => {
                                     const tick = visibleRange.start + j;
                                     const notes = getNotesAt(tick, pitch);
