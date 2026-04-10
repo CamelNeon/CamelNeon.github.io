@@ -210,48 +210,54 @@ export default function App() {
     if (tickDisplayRef.current) tickDisplayRef.current.textContent = '0';
   }, []);
 
+  const playTick = useCallback((tick: number) => {
+    const notesAtTick = notesByTick[tick] || [];
+    notesAtTick.forEach(n => {
+      const layer = song.layers.find(l => l.id === n.layer);
+      if (layer && !layer.muted) {
+        audioService.playNote(n.instrument, n.pitch);
+      }
+    });
+
+    // Update DOM directly for performance
+    if (cursorRef.current) {
+      cursorRef.current.style.left = `${tick * GRID_SIZE}px`;
+    }
+    if (tickDisplayRef.current) {
+      tickDisplayRef.current.textContent = tick.toString();
+    }
+
+    // Auto-scroll
+    if (scrollContainerRef.current) {
+      const container = scrollContainerRef.current;
+      const scrollLeft = container.scrollLeft;
+      const width = container.clientWidth;
+      const cursorX = tick * GRID_SIZE;
+      
+      if (cursorX > scrollLeft + width - 100) {
+        container.scrollLeft = cursorX - 100;
+      }
+    }
+  }, [notesByTick, song.layers]);
+
   const togglePlay = async () => {
     if (!isPlaying) {
       await initAudio();
       setIsPlaying(true);
       
+      // Play first tick immediately
+      playTick(currentTickRef.current);
+      
       playbackRef.current = window.setInterval(() => {
         const next = currentTickRef.current + 1;
-        currentTickRef.current = next;
-
+        
         if (next >= 1000) {
           stopPlayback();
           return;
         }
-        
-        // Update DOM directly for performance
-        if (cursorRef.current) {
-          cursorRef.current.style.left = `${next * GRID_SIZE}px`;
-        }
-        if (tickDisplayRef.current) {
-          tickDisplayRef.current.textContent = next.toString();
-        }
-        
-        // Play notes at this tick
-        const notesAtTick = notesByTick[next] || [];
-        notesAtTick.forEach(n => {
-          const layer = song.layers.find(l => l.id === n.layer);
-          if (layer && !layer.muted) {
-            audioService.playNote(n.instrument, n.pitch);
-          }
-        });
-        
-        // Auto-scroll
-        if (scrollContainerRef.current) {
-          const container = scrollContainerRef.current;
-          const scrollLeft = container.scrollLeft;
-          const width = container.clientWidth;
-          const cursorX = next * GRID_SIZE;
-          
-          if (cursorX > scrollLeft + width - 100) {
-            container.scrollLeft = cursorX - 100;
-          }
-        }
+
+        currentTickRef.current = next;
+        playTick(next);
       }, 1000 / song.tempo);
     } else {
       stopPlayback();
@@ -432,6 +438,11 @@ export default function App() {
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      const isInput = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
+      
+      if (isInput) return;
+
       if (e.code === 'Space') {
         e.preventDefault();
         togglePlay();
@@ -470,45 +481,47 @@ export default function App() {
             </Button>
             <div className="w-px h-6 bg-white/10 mx-1" />
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={exportSong} 
-                  className="text-white/60 hover:text-white hover:bg-white/5"
-                >
-                  <Save className="w-5 h-5" />
-                </Button>
+              <TooltipTrigger 
+                render={
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={exportSong} 
+                    className="text-white/60 hover:text-white hover:bg-white/5"
+                  />
+                }
+              >
+                <Save className="w-5 h-5" />
               </TooltipTrigger>
               <TooltipContent>Export Song (JSON)</TooltipContent>
             </Tooltip>
 
             <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="relative">
-                  <input
-                    type="file"
-                    accept=".json"
-                    onChange={importSong}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                    title="Import Song"
-                  />
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="text-white/60 hover:text-white hover:bg-white/5"
-                  >
-                    <Download className="w-5 h-5" />
-                  </Button>
-                </div>
+              <TooltipTrigger render={<div className="relative" />}>
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={importSong}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  title="Import Song"
+                />
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="text-white/60 hover:text-white hover:bg-white/5"
+                >
+                  <Download className="w-5 h-5" />
+                </Button>
               </TooltipTrigger>
               <TooltipContent>Import Song (JSON)</TooltipContent>
             </Tooltip>
             <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-white/60 hover:text-white hover:bg-white/5">
-                  <Settings className="w-5 h-5" />
-                </Button>
+              <DialogTrigger 
+                render={
+                  <Button variant="ghost" size="icon" className="text-white/60 hover:text-white hover:bg-white/5" />
+                }
+              >
+                <Settings className="w-5 h-5" />
               </DialogTrigger>
               <DialogContent className="bg-[#1a1a1a] border-white/10 text-white">
                 <DialogHeader>

@@ -1,0 +1,66 @@
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #000080; /* Classic Windows Blue */
+    background-image: url('https://www.transparenttextures.com/patterns/clouds.png');
+    font-family: "Comic Sans MS", "Comic Sans", cursive;
+}
+
+/* The WordArt Style */
+.wordart {
+    position: absolute;
+    font-size: 5rem;
+    font-weight: bold;
+    white-space: nowrap;
+    user-select: none;
+    cursor: not-allowed;
+    display: inline-block;
+    
+    /* Rainbow Gradient Effect */
+    background: linear-gradient(to right, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    
+    /* 3D Drop Shadow Effect */
+    filter: drop-shadow(5px 5px 0px #000);
+    transform: skew(-10deg) scale(1.2);
+    transition: transform 0.1s ease;
+}
+
+/* Pulsing animation */
+@keyframes pulse {
+    0% { transform: skew(-10deg) scale(1.2); }
+    50% { transform: skew(-10deg) scale(1.4); }
+    100% { transform: skew(-10deg) scale(1.2); }
+}
+
+.pulse {
+    animation: pulse 0.5s infinite;
+}
+
+/* Floating "NO" elements */
+.no-popup {
+    position: absolute;
+    color: red;
+    font-weight: bold;
+    font-size: 2rem;
+    pointer-events: none;
+    animation: fadeUp 1s forwards;
+    z-index: 999;
+}
+
+@keyframes fadeUp {
+    0% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-100px); }
+}
+
+/* Secret message in the corner */
+.footer {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    color: white;
+    font-size: 12px;
+    opacity: 0.5;
+}
