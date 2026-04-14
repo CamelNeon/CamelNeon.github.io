@@ -24,12 +24,12 @@ jobs:
           cd noteblock-studio
           npm install
           npm run build
-          cd..
+          cd ..
 
           cd customize-me
           npm install
           npm run build
-          cd.. 
+          cd .. 
           cp -r noteblock-studio/dist/* deploy/noteblock-studio/
           cp -r customize-me/dist/* deploy/customize-me/
           
