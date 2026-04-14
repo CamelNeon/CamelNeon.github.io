@@ -1,0 +1,6 @@
+{
+  "name": "Live Page Architect",
+  "description": "An AI-powered webapp that allows users to live-edit the page they are on using natural language requests, with version history and safety controls.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

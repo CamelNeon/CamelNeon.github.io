@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customize me</title>
+    <meta name="description"
+          content="Prompt an AI to customize the page you are on in real time" />
+    <link rel="stylesheet" href="/assets/Style/global.css">
+    <link rel="stylesheet" href="/assets/CSS/header.css">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            display: flex;
+            background-color: #121212;
+            flex-direction: column;
+        }
+        #header-placeholder {
+            height: var(--header-height, 80px); 
+            flex-shrink: 0;
+        }
+        .app-container {
+            flex-grow: 1; 
+            width: 100%;
+            position: relative;
+        }
+
+        iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="header-placeholder"></div>
+    <div class="app-container">
+        <iframe 
+            src="/customize-me/index.html" 
+            title="Customize Me"
+            allow="autoplay; focus-without-user-activation"
+        ></iframe>
+    </div>
+    <script src="/assets/Scripts/header.js"></script>
+</body>
+</html>
