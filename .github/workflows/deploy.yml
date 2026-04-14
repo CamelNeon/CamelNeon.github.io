@@ -32,6 +32,7 @@ jobs:
           cd .. 
           cp -r noteblock-studio/dist/* deploy/noteblock-studio/
           cp -r customize-me/dist/* deploy/customize-me/
+          cp -r backend/* deploy/backend/
           
           cp index.html deploy/ 2>/dev/null || true
           cp CNAME deploy/ 2>/dev/null || true
