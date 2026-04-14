@@ -73,8 +73,23 @@ const startServer = async () => {
         }
       });
 
-      const result = JSON.parse(response.text || "{}");
-      res.json(result);
+      let text = response.text || "{}";
+      
+      // Clean up markdown code blocks if present
+      if (text.startsWith("```")) {
+        text = text.replace(/^```json\n?/, "").replace(/\n?```$/, "").trim();
+      }
+
+      try {
+        const result = JSON.parse(text);
+        res.json(result);
+      } catch (parseError) {
+        console.error("JSON Parse Error. Raw text:", text);
+        res.status(500).json({ 
+          error: "The AI returned an invalid response format. Please try again.",
+          details: process.env.NODE_ENV === "development" ? text : undefined
+        });
+      }
     } catch (error) {
       console.error("Backend AI Error:", error);
       res.status(500).json({ error: "Failed to process AI request" });
