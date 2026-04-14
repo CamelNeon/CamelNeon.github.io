@@ -39,6 +39,7 @@ jobs:
           cp -r assets deploy/ 2>/dev/null || true
         env:
           CI: false 
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
 
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4
