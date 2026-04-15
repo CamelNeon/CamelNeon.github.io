@@ -35,9 +35,13 @@ jobs:
           cp -r backend/* deploy/backend/
           
           cp index.html deploy/ 2>/dev/null || true
+          cp contact.html deploy/ 2>/dev/null || true
+          cp about.html deploy/ 2>/dev/null || true
           cp CNAME deploy/ 2>/dev/null || true
           cp favicon.ico deploy/ 2>/dev/null || true
           cp -r assets deploy/ 2>/dev/null || true
+          cp -r Apps deploy/ 2>/dev/null || true
+          cp -r Converters deploy/ 2>/dev/null || true
         env:
           CI: false 
           VITE_API_URL: ${{ vars.VITE_API_URL }}

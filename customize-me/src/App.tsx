@@ -219,7 +219,7 @@ export default function App() {
                       Flash
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>Gemini 2.0 Flash (Fast & Capable)</TooltipContent>
+                  <TooltipContent>Gemini 3.0 Flash (Fast & Capable)</TooltipContent>
                 </Tooltip>
 
                 <Tooltip>
@@ -237,7 +237,7 @@ export default function App() {
                       Lite
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>Gemini 2.0 Flash Lite (Ultra Fast)</TooltipContent>
+                  <TooltipContent>Gemini 3.1 Flash Lite (Ultra Fast)</TooltipContent>
                 </Tooltip>
 
                 <Tooltip>
@@ -255,7 +255,7 @@ export default function App() {
                       Gemma
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>Gemma 2 27B (Open Weights)</TooltipContent>
+                  <TooltipContent>Gemma 4 31B (Open Weights)</TooltipContent>
                 </Tooltip>
               </div>
 
@@ -410,7 +410,7 @@ export default function App() {
                         <Sparkles className="w-5 h-5" />
                       </div>
                       <Input 
-                        placeholder="Request a change... (e.g., 'Make the header dark with a neon glow')"
+                        placeholder="Request a change... (e.g., 'Make the page blue with a spinning cat image')"
                         value={prompt}
                         onChange={(e) => setPrompt(e.target.value)}
                         onKeyDown={(e) => e.key === "Enter" && handleUpdate()}
@@ -439,15 +439,6 @@ export default function App() {
                         </TooltipContent>
                       </Tooltip>
 
-                      <Tooltip>
-                        <TooltipTrigger className="flex items-center gap-1.5 text-[10px] text-zinc-500 uppercase tracking-wider font-semibold cursor-help bg-transparent border-none p-0 outline-none">
-                          <Info className="w-3 h-3 text-blue-500" />
-                          <span>Token Optimized</span>
-                        </TooltipTrigger>
-                        <TooltipContent side="top" className="max-w-xs bg-zinc-900 border-zinc-800 text-zinc-300">
-                          <p>Requests are optimized to minimize token usage while maintaining high quality output.</p>
-                        </TooltipContent>
-                      </Tooltip>
                     </div>
                     <p className="text-[10px] text-zinc-600 italic">
                       AI updates HTML, CSS, and JS live

@@ -18,7 +18,7 @@ function animatePlanes() {
     function createPlane() {
         const plane = document.createElement('img');
         const header = document.getElementById('header-placeholder')
-        plane.src = '/assets/media/plane.png';
+        plane.src = '/assets/Media/plane.png';
         plane.classList.add('plane');
         document.body.appendChild(plane);
 
