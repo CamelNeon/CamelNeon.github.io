@@ -111,8 +111,6 @@ function animate() {
   // Restoring force to bring rotation back to 0
   aRot += -rotation * ROT_ATTRACTION;
 
-  console.log(aRot);
-
   // Integrate with friction
   vRot = vRot * ROT_FRICTION + aRot;
   rotation += vRot;
