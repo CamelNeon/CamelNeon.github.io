@@ -7,7 +7,7 @@ import { rateLimit } from "express-rate-limit";
 dotenv.config();
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
-const MAX_PROMPT_LENGTH = 500;
+const MAX_PROMPT_LENGTH = 2500;
 
 // Rate Limiting Configuration
 const minuteLimiter = rateLimit({
