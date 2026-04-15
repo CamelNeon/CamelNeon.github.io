@@ -99,9 +99,30 @@ const startServer = async () => {
           details: process.env.NODE_ENV === "development" ? text : undefined
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Backend AI Error:", error);
-      res.status(500).json({ error: "Failed to process AI request" });
+      
+      let statusCode = 500;
+      let errorMessage = "Failed to process AI request. Please try again later.";
+
+      // Handle specific Gemini API errors
+      if (error.status) {
+        statusCode = error.status;
+        if (statusCode === 429) {
+          errorMessage = "Too many requests. Please wait a moment before trying again.";
+        } else if (statusCode === 503) {
+          errorMessage = "The AI service is currently unavailable. Please try again in a few minutes.";
+        } else if (statusCode === 400) {
+          errorMessage = "The request was invalid. This might be due to content safety filters or an overly complex prompt.";
+        } else if (statusCode === 401 || statusCode === 403) {
+          errorMessage = "Server configuration error: Invalid API key.";
+        }
+      } else if (error.message && error.message.includes("fetch failed")) {
+        statusCode = 503;
+        errorMessage = "Network error: Could not connect to the AI service.";
+      }
+
+      res.status(statusCode).json({ error: errorMessage });
     }
   });
 
