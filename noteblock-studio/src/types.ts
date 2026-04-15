@@ -51,7 +51,7 @@ export const INSTRUMENTS: { type: InstrumentType; name: string; block: string; c
   { type: 'flute', name: 'Flute', block: 'Clay', color: '#f472b6' },
   { type: 'bell', name: 'Bell', block: 'Gold Block', color: '#fb923c' },
   { type: 'icechime', name: 'Chime', block: 'Packed Ice', color: '#2dd4bf' },
-  { type: 'xylobone', name: 'Xylophone', block: 'Bone Block', color: '#e879f9' },
+  { type: 'xylobone', name: 'Xylobone', block: 'Bone Block', color: '#e879f9' },
   { type: 'iron_xylophone', name: 'Iron Xylophone', block: 'Iron Block', color: '#cbd5e1' },
   { type: 'cow_bell', name: 'Cow Bell', block: 'Soul Sand', color: '#a78bfa' },
   { type: 'didgeridoo', name: 'Didgeridoo', block: 'Pumpkin', color: '#fb7185' },
