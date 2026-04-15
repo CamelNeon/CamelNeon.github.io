@@ -76,12 +76,12 @@ const startServer = async () => {
 
     try {
       // Map user-friendly IDs to actual model names
-      let actualModelId = "gemini-3.0-flash-preview";
+      let actualModelId = "gemini-3-flash-preview";
       let useThinking = true;
 
       if (modelId === "gemini-lite") {
         actualModelId = "gemini-3.1-flash-lite-preview";
-      } else if (modelId === "gemma-4-31b-it") {
+      } else if (modelId === "gemma") {
         actualModelId = "gemma-4-31b-it";
         useThinking = false; // Gemma doesn't support thinkingConfig
       }

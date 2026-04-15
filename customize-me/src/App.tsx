@@ -165,7 +165,7 @@ export default function App() {
                       Flash
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>Gemini 2.0 Flash (Fast & Capable)</TooltipContent>
+                  <TooltipContent>Gemini 3.0 Flash (Fast & Capable)</TooltipContent>
                 </Tooltip>
 
                 <Tooltip>
@@ -183,7 +183,7 @@ export default function App() {
                       Lite
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>Gemini 2.0 Flash Lite (Ultra Fast)</TooltipContent>
+                  <TooltipContent>Gemini 3.1 Flash Lite (Ultra Fast)</TooltipContent>
                 </Tooltip>
 
                 <Tooltip>
@@ -201,7 +201,7 @@ export default function App() {
                       Gemma
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>Gemma 2 27B (Open Weights)</TooltipContent>
+                  <TooltipContent>Gemma 4 31B (Open Weights)</TooltipContent>
                 </Tooltip>
               </div>
 
