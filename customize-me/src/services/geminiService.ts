@@ -5,15 +5,20 @@ export interface PageVersion {
   prompt: string;
 }
 
-export async function updatePageCode(currentCode: string, userPrompt: string): Promise<{ code: string; explanation: string; safetyCheck: boolean }> {
+export async function updatePageCode(currentCode: string, userPrompt: string, modelId: string = "gemini-flash"): Promise<{ code: string; explanation: string; safetyCheck: boolean }> {
   try {
-    const apiUrl = import.meta.env.VITE_API_URL || "";
+    const apiUrl = import.meta.env.VITE_API_URL;
+    
+    if (!apiUrl) {
+      throw new Error("VITE_API_URL is not defined. Please check your environment variables and rebuild the app.");
+    }
+
     const response = await fetch(`${apiUrl}/api/update-page`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ currentCode, userPrompt }),
+      body: JSON.stringify({ currentCode, userPrompt, modelId }),
     });
 
     if (!response.ok) {

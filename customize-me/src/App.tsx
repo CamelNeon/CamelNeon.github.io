@@ -27,7 +27,10 @@ import {
   Maximize,
   Minimize,
   ShieldAlert,
-  Info
+  Info,
+  Cpu,
+  Zap,
+  Brain
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -68,6 +71,7 @@ export default function App() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [selectedModel, setSelectedModel] = useState("gemini-flash");
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const currentVersion = history[currentIndex];
@@ -86,7 +90,7 @@ export default function App() {
     const toastId = toast.loading("Architecting your changes...");
 
     try {
-      const result = await updatePageCode(currentVersion.code, prompt);
+      const result = await updatePageCode(currentVersion.code, prompt, selectedModel);
 
       if (!result.safetyCheck) {
         toast.error("Safety Policy Violation", {
@@ -143,7 +147,67 @@ export default function App() {
               </Badge>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-4">
+              {/* Model Selector */}
+              <div className="flex items-center gap-1 bg-zinc-800/50 rounded-lg p-1 border border-zinc-700">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={cn(
+                        "h-8 px-3 text-xs gap-2",
+                        selectedModel === "gemini-flash" ? "bg-indigo-600 text-white hover:bg-indigo-500" : "text-zinc-400 hover:text-zinc-200"
+                      )}
+                      onClick={() => setSelectedModel("gemini-flash")}
+                    >
+                      <Zap className="w-3.5 h-3.5" />
+                      Flash
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Gemini 2.0 Flash (Fast & Capable)</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={cn(
+                        "h-8 px-3 text-xs gap-2",
+                        selectedModel === "gemini-lite" ? "bg-indigo-600 text-white hover:bg-indigo-500" : "text-zinc-400 hover:text-zinc-200"
+                      )}
+                      onClick={() => setSelectedModel("gemini-lite")}
+                    >
+                      <Cpu className="w-3.5 h-3.5" />
+                      Lite
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Gemini 2.0 Flash Lite (Ultra Fast)</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={cn(
+                        "h-8 px-3 text-xs gap-2",
+                        selectedModel === "gemma" ? "bg-indigo-600 text-white hover:bg-indigo-500" : "text-zinc-400 hover:text-zinc-200"
+                      )}
+                      onClick={() => setSelectedModel("gemma")}
+                    >
+                      <Brain className="w-3.5 h-3.5" />
+                      Gemma
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Gemma 2 27B (Open Weights)</TooltipContent>
+                </Tooltip>
+              </div>
+
+              <Separator orientation="vertical" className="h-6 bg-zinc-800 mx-1" />
+
+              <div className="flex items-center gap-2">
               <Tooltip>
                 <TooltipTrigger 
                   onClick={() => setIsFullscreen(true)}
@@ -196,7 +260,8 @@ export default function App() {
                 </Button>
               </div>
             </div>
-          </header>
+          </div>
+        </header>
         )}
 
         <main className="flex-1 flex overflow-hidden relative">
