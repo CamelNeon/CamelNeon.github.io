@@ -10,6 +10,8 @@ const PITCH_MAP: Record<number, string> = {
 
 class AudioService {
   private initialized = false;
+  private samplers: Partial<Record<InstrumentType, Tone.Sampler>> = {};
+  private synths: Partial<Record<InstrumentType, any>> = {};
 
   async init() {
     if (this.initialized) return;
@@ -18,8 +20,27 @@ class AudioService {
   }
 
   private getInstrument(type: InstrumentType): any {
-    // For simplicity and reliability in this environment, I'll use Synths configured to sound like the instruments.
+    // Check if we have a sample for this instrument
+    const samplePath = `/sounds/${type}.ogg`;
     
+    // We'll use a Sampler for high-quality custom sounds
+    // Note: We assume the sample is at F#4 (pitch 12) which is the middle of Minecraft's range
+    const sampler = new Tone.Sampler({
+      urls: {
+        "F#4": `${type}.ogg`
+      },
+      baseUrl: "/sounds/",
+      onload: () => {
+        console.log(`Loaded sample for ${type}`);
+      },
+      onerror: (err) => {
+        console.warn(`Could not load sample for ${type}, falling back to synth.`, err);
+      }
+    }).toDestination();
+
+    this.samplers[type] = sampler;
+
+    // Fallback synths (the original logic)
     switch (type) {
       case 'harp':
         return new Tone.PolySynth(Tone.Synth, {
@@ -27,11 +48,12 @@ class AudioService {
           envelope: { attack: 0.005, decay: 0.3, sustain: 0, release: 0.1 }
         }).toDestination();
       case 'bass':
+      case 'bassattack':
         return new Tone.PolySynth(Tone.Synth, {
           oscillator: { type: 'sine' },
           envelope: { attack: 0.01, decay: 0.4, sustain: 0, release: 0.2 }
         }).toDestination();
-      case 'basedrum':
+      case 'bd':
         return new Tone.MembraneSynth({
           pitchDecay: 0.05,
           octaves: 10,
@@ -61,7 +83,7 @@ class AudioService {
           modulation: { type: 'square' },
           modulationEnvelope: { attack: 0.01, decay: 0.5, sustain: 0, release: 0.5 }
         }).toDestination();
-      case 'chime':
+      case 'icechime':
         return new Tone.PolySynth(Tone.FMSynth, {
           harmonicity: 2,
           modulationIndex: 10,
@@ -73,7 +95,7 @@ class AudioService {
           oscillator: { type: 'sawtooth' },
           envelope: { attack: 0.01, decay: 0.3, sustain: 0, release: 0.1 }
         }).toDestination();
-      case 'xylophone':
+      case 'xylobone':
         return new Tone.PolySynth(Tone.Synth, {
           oscillator: { type: 'sine' },
           envelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.1 }
@@ -123,15 +145,24 @@ class AudioService {
     if (!this.instrumentCache[type]) {
       this.instrumentCache[type] = this.getInstrument(type);
     }
-    const inst = this.instrumentCache[type]!;
+    
+    const sampler = this.samplers[type];
+    const synth = this.instrumentCache[type];
     const noteName = PITCH_MAP[pitch];
     
-    if (inst instanceof Tone.NoiseSynth) {
-      inst.triggerAttackRelease("16n", time);
-    } else if (inst instanceof Tone.MembraneSynth) {
-      inst.triggerAttackRelease(noteName, "16n", time);
+    // If sampler is loaded and ready, use it
+    if (sampler && sampler.loaded) {
+      sampler.triggerAttackRelease(noteName, "16n", time);
+      return;
+    }
+
+    // Otherwise use the synth fallback
+    if (synth instanceof Tone.NoiseSynth) {
+      synth.triggerAttackRelease("16n", time);
+    } else if (synth instanceof Tone.MembraneSynth) {
+      synth.triggerAttackRelease(noteName, "16n", time);
     } else {
-      inst.triggerAttackRelease(noteName, "16n", time);
+      synth.triggerAttackRelease(noteName, "16n", time);
     }
   }
 }

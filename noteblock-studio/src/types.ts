@@ -1,14 +1,15 @@
 export type InstrumentType = 
   | 'harp' 
   | 'bass' 
+  | 'bassattack'
   | 'snare' 
   | 'hat' 
-  | 'basedrum' 
+  | 'bd' 
   | 'bell' 
   | 'flute' 
-  | 'chime' 
+  | 'icechime' 
   | 'guitar' 
-  | 'xylophone' 
+  | 'xylobone' 
   | 'iron_xylophone' 
   | 'cow_bell' 
   | 'didgeridoo' 
@@ -43,13 +44,14 @@ export interface Layer {
 export const INSTRUMENTS: { type: InstrumentType; name: string; block: string; color: string }[] = [
   { type: 'harp', name: 'Piano (Harp)', block: 'Any', color: '#4ade80' },
   { type: 'bass', name: 'Bass Guitar', block: 'Wood', color: '#facc15' },
-  { type: 'basedrum', name: 'Bass Drum', block: 'Stone', color: '#94a3b8' },
+  { type: 'bassattack', name: 'Bass Attack', block: 'Wood (Attack)', color: '#eab308' },
+  { type: 'bd', name: 'Bass Drum', block: 'Stone', color: '#94a3b8' },
   { type: 'snare', name: 'Snare Drum', block: 'Sand', color: '#fbbf24' },
   { type: 'hat', name: 'Clicks', block: 'Glass', color: '#38bdf8' },
   { type: 'flute', name: 'Flute', block: 'Clay', color: '#f472b6' },
   { type: 'bell', name: 'Bell', block: 'Gold Block', color: '#fb923c' },
-  { type: 'chime', name: 'Chime', block: 'Packed Ice', color: '#2dd4bf' },
-  { type: 'xylophone', name: 'Xylophone', block: 'Bone Block', color: '#e879f9' },
+  { type: 'icechime', name: 'Chime', block: 'Packed Ice', color: '#2dd4bf' },
+  { type: 'xylobone', name: 'Xylophone', block: 'Bone Block', color: '#e879f9' },
   { type: 'iron_xylophone', name: 'Iron Xylophone', block: 'Iron Block', color: '#cbd5e1' },
   { type: 'cow_bell', name: 'Cow Bell', block: 'Soul Sand', color: '#a78bfa' },
   { type: 'didgeridoo', name: 'Didgeridoo', block: 'Pumpkin', color: '#fb7185' },
