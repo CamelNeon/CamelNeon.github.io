@@ -55,7 +55,7 @@ const startServer = async () => {
 
     try {
       const response = await ai.models.generateContent({
-        model: "gemini-3.1-flash-lite-preview",
+        model: "gemma-4-31b-it",
         contents: [
           {
             role: "user",
