@@ -38,7 +38,7 @@ class AudioService {
 
   private getInstrument(type: InstrumentType): any {
     // Check if we have a sample for this instrument
-    const samplePath = `/sounds/${type}.ogg`;
+    const samplePath = `/noteblock-studio/sounds/${type}.ogg`;
     
     // We'll use a Sampler for high-quality custom sounds
     // Note: We assume the sample is at F#4 (pitch 12) which is the middle of Minecraft's range
@@ -46,7 +46,7 @@ class AudioService {
       urls: {
         "F#4": `${type}.ogg`
       },
-      baseUrl: "/sounds/",
+      baseUrl: "/noteblock-studio/sounds/",
       onload: () => {
         console.log(`Loaded sample for ${type}`);
       },
