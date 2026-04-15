@@ -133,6 +133,7 @@ GridCell.displayName = 'GridCell';
 export default function App() {
   const [song, setSong] = useState<Song>(DEFAULT_SONG);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isAudioLoading, setIsAudioLoading] = useState(false);
   const [selectedInstrument, setSelectedInstrument] = useState<InstrumentType>('harp');
   const [selectedLayer, setSelectedLayer] = useState(0);
   const [showBlueprint, setShowBlueprint] = useState(false);
@@ -199,7 +200,13 @@ export default function App() {
 
   // Initialize audio on first interaction
   const initAudio = async () => {
-    await audioService.init();
+    if (isAudioLoading) return;
+    setIsAudioLoading(true);
+    try {
+      await audioService.init();
+    } finally {
+      setIsAudioLoading(false);
+    }
   };
 
   const stopPlayback = useCallback(() => {
@@ -334,7 +341,7 @@ export default function App() {
     blueprint += `TICK ${firstTick}: `;
     firstNotes.forEach((n, idx) => {
       const inst = INSTRUMENTS.find(ins => ins.type === n.instrument);
-      blueprint += `[${inst?.name} | Pitch: ${n.pitch}]${idx < firstNotes.length - 1 ? ' + ' : ''}`;
+      blueprint += `[${inst?.name} (Block: ${inst?.block}) | Pitch: ${n.pitch}]${idx < firstNotes.length - 1 ? ' + ' : ''}`;
     });
     blueprint += `\n`;
     
@@ -356,13 +363,13 @@ export default function App() {
       blueprint += `TICK ${currentTick}: ${repeaters}-> `;
       notes.forEach((n, idx) => {
         const inst = INSTRUMENTS.find(ins => ins.type === n.instrument);
-        blueprint += `[${inst?.name} | Pitch: ${n.pitch}]${idx < notes.length - 1 ? ' + ' : ''}`;
+        blueprint += `[${inst?.name} (Block: ${inst?.block}) | Pitch: ${n.pitch}]${idx < notes.length - 1 ? ' + ' : ''}`;
       });
       blueprint += `\n`;
     }
 
     blueprint += `\n==========================================\n`;
-    blueprint += `PRO TIP: Place the block mentioned in the instrument name (e.g., Gold Block for Bell) UNDER the note block to get the correct sound in-game.`;
+    blueprint += `PRO TIP: To get the correct sound in Minecraft, you MUST place the specified block (e.g., Wood, Stone, Gold Block) directly UNDER the Note Block.`;
 
     return blueprint;
   };
@@ -554,21 +561,21 @@ export default function App() {
         <main className="flex h-[calc(100vh-73px)]">
           {/* Left Sidebar - Instruments & Layers */}
           <aside className="w-72 border-r border-white/10 bg-[#121212] flex flex-col">
-            <div className="p-4 border-b border-white/10">
-              <h2 className="text-xs font-bold text-white/40 uppercase tracking-widest mb-4">Instruments</h2>
-              <div className="grid grid-cols-1 gap-1">
+            <div className="p-3 border-b border-white/10">
+              <h2 className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2">Instruments</h2>
+              <div className="grid grid-cols-2 gap-1">
                 {INSTRUMENTS.map(inst => (
                   <button
                     key={inst.type}
                     onClick={() => setSelectedInstrument(inst.type)}
                     className={cn(
-                      "flex items-center gap-3 p-2 rounded-md transition-all text-sm group",
+                      "flex items-center gap-1.5 p-1 rounded-md transition-all text-[10px] group",
                       selectedInstrument === inst.type ? "bg-white/10 text-white" : "text-white/50 hover:text-white hover:bg-white/5"
                     )}
+                    title={`${inst.name} (${inst.block})`}
                   >
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: inst.color }} />
-                    <span className="flex-1 text-left">{inst.name}</span>
-                    <span className="text-[10px] opacity-0 group-hover:opacity-100 transition-opacity text-white/30">{inst.block}</span>
+                    <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: inst.color }} />
+                    <span className="flex-1 text-left truncate leading-tight">{inst.name}</span>
                   </button>
                 ))}
               </div>
@@ -650,12 +657,20 @@ export default function App() {
               </Button>
               <Button 
                 onClick={togglePlay}
+                disabled={isAudioLoading}
                 className={cn(
                   "h-14 w-14 rounded-xl shadow-lg transition-all",
-                  isPlaying ? "bg-red-500 hover:bg-red-600 text-white" : "bg-green-600 hover:bg-green-700 text-white"
+                  isPlaying ? "bg-red-500 hover:bg-red-600 text-white" : "bg-green-600 hover:bg-green-700 text-white",
+                  isAudioLoading && "opacity-50 cursor-wait"
                 )}
               >
-                {isPlaying ? <Pause className="w-6 h-6 fill-current" /> : <Play className="w-6 h-6 fill-current ml-1" />}
+                {isAudioLoading ? (
+                  <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : isPlaying ? (
+                  <Pause className="w-6 h-6 fill-current" />
+                ) : (
+                  <Play className="w-6 h-6 fill-current ml-1" />
+                )}
               </Button>
               <div className="w-px h-8 bg-white/10 mx-2" />
               <div className="px-4 flex flex-col items-center">

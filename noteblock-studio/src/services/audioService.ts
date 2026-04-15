@@ -17,11 +17,28 @@ class AudioService {
     if (this.initialized) return;
     this.initialized = true;
     await Tone.start();
+
+    // Pre-load all instruments
+    const instrumentTypes: InstrumentType[] = [
+      'harp', 'bass', 'snare', 'hat', 'bd', 'bell', 'flute', 
+      'icechime', 'guitar', 'xylobone', 'iron_xylophone', 'cow_bell', 
+      'didgeridoo', 'bit', 'banjo', 'pling'
+    ];
+
+    for (const type of instrumentTypes) {
+      if (!this.instrumentCache[type]) {
+        this.instrumentCache[type] = this.getInstrument(type);
+      }
+    }
+
+    // Wait for all samples to load
+    await Tone.loaded();
+    console.log("All audio samples loaded and ready.");
   }
 
   private getInstrument(type: InstrumentType): any {
     // Check if we have a sample for this instrument
-    const samplePath = `/noteblock-studio/sounds/${type}.ogg`;
+    const samplePath = `/sounds/${type}.ogg`;
     
     // We'll use a Sampler for high-quality custom sounds
     // Note: We assume the sample is at F#4 (pitch 12) which is the middle of Minecraft's range
@@ -29,7 +46,7 @@ class AudioService {
       urls: {
         "F#4": `${type}.ogg`
       },
-      baseUrl: "/noteblock-studio/sounds/",
+      baseUrl: "/sounds/",
       onload: () => {
         console.log(`Loaded sample for ${type}`);
       },
@@ -48,7 +65,6 @@ class AudioService {
           envelope: { attack: 0.005, decay: 0.3, sustain: 0, release: 0.1 }
         }).toDestination();
       case 'bass':
-      case 'bassattack':
         return new Tone.PolySynth(Tone.Synth, {
           oscillator: { type: 'sine' },
           envelope: { attack: 0.01, decay: 0.4, sustain: 0, release: 0.2 }
