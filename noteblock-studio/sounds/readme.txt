@@ -2,7 +2,6 @@ Place your custom .ogg instrument sounds in this directory.
 The files should be named after the instrument type:
 - banjo.ogg
 - bass.ogg
-- bassattack.ogg
 - bd.ogg
 - bell.ogg
 - bit.ogg
