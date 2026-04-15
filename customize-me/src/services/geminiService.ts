@@ -3,6 +3,7 @@ export interface PageVersion {
   timestamp: number;
   code: string;
   prompt: string;
+  explanation: string;
 }
 
 export async function updatePageCode(currentCode: string, userPrompt: string, modelId: string = "gemini-flash"): Promise<{ code: string; explanation: string; safetyCheck: boolean }> {

@@ -40,7 +40,7 @@ SAFETY & USAGE POLICY:
 RESPONSE FORMAT:
 You must respond with a JSON object containing:
 - code: The full HTML string of the updated page.
-- explanation: A very brief summary of the changes made.
+- explanation: A very brief summary in a few words of the changes made.
 - safetyCheck: A boolean indicating if the request was safe to process. If false, provide a reason in the explanation and return the original code.
 `;
 

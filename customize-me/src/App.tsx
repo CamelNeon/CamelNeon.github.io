@@ -64,7 +64,7 @@ const INITIAL_CODE = `<!DOCTYPE html>
 
 export default function App() {
   const [history, setHistory] = useState<PageVersion[]>([
-    { id: "initial", timestamp: Date.now(), code: INITIAL_CODE, prompt: "Initial Version" }
+    { id: "initial", timestamp: Date.now(), code: INITIAL_CODE, prompt: "Initial Version", explanation: "Starting point for your architected page." }
   ]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [prompt, setPrompt] = useState("");
@@ -105,7 +105,8 @@ export default function App() {
         id: Math.random().toString(36).substr(2, 9),
         timestamp: Date.now(),
         code: result.code,
-        prompt: prompt
+        prompt: prompt,
+        explanation: result.explanation
       };
 
       const newHistory = [...history.slice(0, currentIndex + 1), newVersion];
@@ -165,7 +166,7 @@ export default function App() {
                       Flash
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>Gemini 3.0 Flash (Fast & Capable)</TooltipContent>
+                  <TooltipContent>Gemini 2.0 Flash (Fast & Capable)</TooltipContent>
                 </Tooltip>
 
                 <Tooltip>
@@ -183,7 +184,7 @@ export default function App() {
                       Lite
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>Gemini 3.1 Flash Lite (Ultra Fast)</TooltipContent>
+                  <TooltipContent>Gemini 2.0 Flash Lite (Ultra Fast)</TooltipContent>
                 </Tooltip>
 
                 <Tooltip>
@@ -201,7 +202,7 @@ export default function App() {
                       Gemma
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>Gemma 4 31B (Open Weights)</TooltipContent>
+                  <TooltipContent>Gemma 2 27B (Open Weights)</TooltipContent>
                 </Tooltip>
               </div>
 
@@ -300,7 +301,11 @@ export default function App() {
                     </div>
                     <div className="text-center">
                       <p className="font-medium">Architecting...</p>
-                      <p className="text-xs text-zinc-500 mt-1">Applying your vision to the page</p>
+                      <p className="text-xs text-zinc-500 mt-1">
+                        {selectedModel === "gemma" 
+                          ? "Using Gemma model - this might take a moment..." 
+                          : "Applying your vision to the page"}
+                      </p>
                     </div>
                   </motion.div>
                 </div>
@@ -405,6 +410,13 @@ export default function App() {
                         <p className="text-sm text-zinc-300 line-clamp-2 italic">
                           "{version.prompt}"
                         </p>
+                        
+                        <div className="mt-3 p-2 bg-zinc-900/50 rounded border border-zinc-800/50">
+                          <p className="text-[10px] text-zinc-400 leading-relaxed">
+                            {version.explanation}
+                          </p>
+                        </div>
+
                         {currentIndex === index && (
                           <div className="mt-2 flex items-center gap-1 text-[10px] text-indigo-400 font-bold uppercase tracking-tighter">
                             <Eye className="w-3 h-3" />
