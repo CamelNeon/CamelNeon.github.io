@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, ChangeEvent } from "react";
 import { updatePageCode, PageVersion } from "./services/geminiService";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,7 +30,9 @@ import {
   Info,
   Cpu,
   Zap,
-  Brain
+  Brain,
+  Download,
+  Upload
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -73,6 +75,7 @@ export default function App() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [selectedModel, setSelectedModel] = useState("gemini-flash");
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const currentVersion = history[currentIndex];
 
@@ -130,6 +133,56 @@ export default function App() {
   const revertTo = (index: number) => {
     setCurrentIndex(index);
     toast.info(`Reverted to: ${history[index].prompt}`);
+  };
+
+  const handleExport = () => {
+    const data = {
+      format: "lpa",
+      version: "1.0.0",
+      ...currentVersion
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `page-version-${currentIndex + 1}.lpa`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success("Version Exported!");
+  };
+
+  const handleImport = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const data = JSON.parse(event.target?.result as string);
+        if (data.format !== "lpa") {
+          throw new Error("Invalid file format. Please use a .lpa file.");
+        }
+
+        const newVersion: PageVersion = {
+          id: Math.random().toString(36).substr(2, 9),
+          timestamp: Date.now(),
+          code: data.code,
+          prompt: `Imported: ${data.prompt}`,
+          explanation: data.explanation || "Imported from file."
+        };
+
+        const newHistory = [...history, newVersion];
+        setHistory(newHistory);
+        setCurrentIndex(newHistory.length - 1);
+        toast.success("Version Imported!");
+      } catch (error: any) {
+        toast.error("Import Failed", { description: error.message });
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = ""; // Reset input
   };
 
   return (
@@ -209,7 +262,42 @@ export default function App() {
               <Separator orientation="vertical" className="h-6 bg-zinc-800 mx-1" />
 
               <div className="flex items-center gap-2">
-              <Tooltip>
+                <Tooltip>
+                  <TooltipTrigger 
+                    onClick={() => fileInputRef.current?.click()}
+                    className={cn(
+                      buttonVariants({ variant: "ghost", size: "icon" }),
+                      "text-zinc-400 hover:text-white"
+                    )}
+                  >
+                    <Upload className="w-5 h-5" />
+                    <input 
+                      type="file" 
+                      ref={fileInputRef} 
+                      className="hidden" 
+                      accept=".lpa" 
+                      onChange={handleImport} 
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent>Import .lpa</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger 
+                    onClick={handleExport}
+                    className={cn(
+                      buttonVariants({ variant: "ghost", size: "icon" }),
+                      "text-zinc-400 hover:text-white"
+                    )}
+                  >
+                    <Download className="w-5 h-5" />
+                  </TooltipTrigger>
+                  <TooltipContent>Export .lpa</TooltipContent>
+                </Tooltip>
+
+                <Separator orientation="vertical" className="h-6 bg-zinc-800 mx-1" />
+
+                <Tooltip>
                 <TooltipTrigger 
                   onClick={() => setIsFullscreen(true)}
                   className={cn(
