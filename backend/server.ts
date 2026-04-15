@@ -2,10 +2,29 @@ import express from "express";
 import cors from "cors";
 import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
 import dotenv from "dotenv";
+import { rateLimit } from "express-rate-limit";
 
 dotenv.config();
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+const MAX_PROMPT_LENGTH = 500;
+
+// Rate Limiting Configuration
+const minuteLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 5, // Limit each IP to 5 requests per minute
+  message: { error: "Too many requests. Please wait a minute before trying again." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const hourLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 20, // Limit each IP to 20 requests per hour
+  message: { error: "Hourly request limit reached. Please try again later." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 const SYSTEM_PROMPT = `You are an expert web developer. Your task is to update the HTML, CSS, and JavaScript of a single-page web application based on a user's request.
 The user will provide the current code and their request.
@@ -29,6 +48,9 @@ const startServer = async () => {
   const app = express();
   const PORT = process.env.PORT || 3000;
 
+  // Trust proxy for IP-based rate limiting on platforms like Render/Cloud Run
+  app.set("trust proxy", 1);
+
   app.use(cors({
     origin: process.env.ALLOWED_ORIGIN || "*",
     methods: ["GET", "POST"],
@@ -37,9 +59,8 @@ const startServer = async () => {
   app.use(express.json());
 
   // API Routes
-  app.post("/api/update-page", async (req, res) => {
-    const { currentCode, userPrompt } = req.body;
-    const MAX_PROMPT_LENGTH = 500;
+  app.post("/api/update-page", minuteLimiter, hourLimiter, async (req, res) => {
+    const { currentCode, userPrompt, modelId } = req.body;
 
     if (!process.env.GEMINI_API_KEY) {
       return res.status(500).json({ error: "GEMINI_API_KEY is not configured on the server." });
@@ -54,8 +75,37 @@ const startServer = async () => {
     }
 
     try {
+      // Map user-friendly IDs to actual model names
+      let actualModelId = "gemini-3.0-flash-preview";
+      let useThinking = true;
+
+      if (modelId === "gemini-lite") {
+        actualModelId = "gemini-3.1-flash-lite-preview";
+      } else if (modelId === "gemma-4-31b-it") {
+        actualModelId = "gemma-4-31b-it";
+        useThinking = false; // Gemma doesn't support thinkingConfig
+      }
+
+      const generationConfig: any = {
+        systemInstruction: SYSTEM_PROMPT,
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            code: { type: Type.STRING },
+            explanation: { type: Type.STRING },
+            safetyCheck: { type: Type.BOOLEAN }
+          },
+          required: ["code", "explanation", "safetyCheck"]
+        }
+      };
+
+      if (useThinking) {
+        generationConfig.thinkingConfig = { thinkingLevel: ThinkingLevel.LOW };
+      }
+
       const response = await ai.models.generateContent({
-        model: "gemma-4-31b-it",
+        model: actualModelId,
         contents: [
           {
             role: "user",
@@ -66,20 +116,7 @@ const startServer = async () => {
             ]
           }
         ],
-        config: {
-          systemInstruction: SYSTEM_PROMPT,
-          responseMimeType: "application/json",
-          thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              code: { type: Type.STRING },
-              explanation: { type: Type.STRING },
-              safetyCheck: { type: Type.BOOLEAN }
-            },
-            required: ["code", "explanation", "safetyCheck"]
-          }
-        }
+        config: generationConfig
       });
 
       let text = response.text || "{}";
