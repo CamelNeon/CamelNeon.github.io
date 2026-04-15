@@ -378,7 +378,7 @@ export default function App() {
                 animate={{ x: 0 }}
                 exit={{ x: 400 }}
                 transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                className="w-80 border-l border-zinc-800 bg-zinc-900/95 backdrop-blur-md flex flex-col"
+                className="w-80 h-full border-l border-zinc-800 bg-zinc-900/95 backdrop-blur-md flex flex-col"
               >
                 <div className="p-4 border-b border-zinc-800 flex items-center justify-between">
                   <h2 className="font-semibold flex items-center gap-2">
@@ -389,7 +389,7 @@ export default function App() {
                     <ChevronRight className="w-4 h-4" />
                   </Button>
                 </div>
-                <ScrollArea className="flex-1">
+                <ScrollArea className="flex-1 min-h-0">
                   <div className="p-4 space-y-3">
                     {history.map((version, index) => (
                       <Card 
