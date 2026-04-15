@@ -24,6 +24,8 @@ import {
   Eye, 
   ChevronLeft, 
   ChevronRight,
+  Maximize,
+  Minimize,
   ShieldAlert,
   Info
 } from "lucide-react";
@@ -65,6 +67,7 @@ export default function App() {
   const [prompt, setPrompt] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const currentVersion = history[currentIndex];
@@ -128,58 +131,73 @@ export default function App() {
     <TooltipProvider>
       <div className="flex flex-col h-screen bg-zinc-950 text-zinc-100 font-sans overflow-hidden">
         {/* Header */}
-        <header className="h-16 border-b border-zinc-800 flex items-center justify-between px-6 bg-zinc-900/50 backdrop-blur-md z-10">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/20">
-              <Sparkles className="w-5 h-5 text-white" />
+        {!isFullscreen && (
+          <header className="h-16 border-b border-zinc-800 flex items-center justify-between px-6 bg-zinc-900/50 backdrop-blur-md z-10">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                <Sparkles className="w-5 h-5 text-white" />
+              </div>
+              <h1 className="font-bold text-lg tracking-tight">Live Page Architect</h1>
+              <Badge variant="outline" className="ml-2 border-zinc-700 text-zinc-400 font-mono text-[10px] uppercase tracking-widest">
+                v1.0.0
+              </Badge>
             </div>
-            <h1 className="font-bold text-lg tracking-tight">Live Page Architect</h1>
-            <Badge variant="outline" className="ml-2 border-zinc-700 text-zinc-400 font-mono text-[10px] uppercase tracking-widest">
-              v1.0.0
-            </Badge>
-          </div>
 
-          <div className="flex items-center gap-2">
-            <Tooltip>
-              <TooltipTrigger 
-                onClick={() => setShowHistory(!showHistory)}
-                className={cn(
-                  buttonVariants({ variant: "ghost", size: "icon" }),
-                  showHistory ? "bg-zinc-800 text-indigo-400" : "text-zinc-400"
-                )}
-              >
-                <History className="w-5 h-5" />
-              </TooltipTrigger>
-              <TooltipContent>Version History</TooltipContent>
-            </Tooltip>
-            
-            <Separator orientation="vertical" className="h-6 bg-zinc-800 mx-2" />
-            
-            <div className="flex items-center gap-1 bg-zinc-800/50 rounded-full px-3 py-1 border border-zinc-700">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-7 w-7 text-zinc-400 hover:text-white disabled:opacity-30"
-                disabled={currentIndex === 0}
-                onClick={() => setCurrentIndex(currentIndex - 1)}
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </Button>
-              <span className="text-xs font-mono text-zinc-500 min-w-[3rem] text-center">
-                {currentIndex + 1} / {history.length}
-              </span>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-7 w-7 text-zinc-400 hover:text-white disabled:opacity-30"
-                disabled={currentIndex === history.length - 1}
-                onClick={() => setCurrentIndex(currentIndex + 1)}
-              >
-                <ChevronRight className="w-4 h-4" />
-              </Button>
+            <div className="flex items-center gap-2">
+              <Tooltip>
+                <TooltipTrigger 
+                  onClick={() => setIsFullscreen(true)}
+                  className={cn(
+                    buttonVariants({ variant: "ghost", size: "icon" }),
+                    "text-zinc-400 hover:text-white"
+                  )}
+                >
+                  <Maximize className="w-5 h-5" />
+                </TooltipTrigger>
+                <TooltipContent>Full Screen</TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger 
+                  onClick={() => setShowHistory(!showHistory)}
+                  className={cn(
+                    buttonVariants({ variant: "ghost", size: "icon" }),
+                    showHistory ? "bg-zinc-800 text-indigo-400" : "text-zinc-400"
+                  )}
+                >
+                  <History className="w-5 h-5" />
+                </TooltipTrigger>
+                <TooltipContent>Version History</TooltipContent>
+              </Tooltip>
+              
+              <Separator orientation="vertical" className="h-6 bg-zinc-800 mx-2" />
+              
+              <div className="flex items-center gap-1 bg-zinc-800/50 rounded-full px-3 py-1 border border-zinc-700">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-7 w-7 text-zinc-400 hover:text-white disabled:opacity-30"
+                  disabled={currentIndex === 0}
+                  onClick={() => setCurrentIndex(currentIndex - 1)}
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+                <span className="text-xs font-mono text-zinc-500 min-w-[3rem] text-center">
+                  {currentIndex + 1} / {history.length}
+                </span>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-7 w-7 text-zinc-400 hover:text-white disabled:opacity-30"
+                  disabled={currentIndex === history.length - 1}
+                  onClick={() => setCurrentIndex(currentIndex + 1)}
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
-          </div>
-        </header>
+          </header>
+        )}
 
         <main className="flex-1 flex overflow-hidden relative">
           {/* Main Preview Area */}
@@ -191,6 +209,18 @@ export default function App() {
                 title="Page Preview"
                 sandbox="allow-scripts allow-forms allow-modals allow-popups"
               />
+
+              {isFullscreen && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setIsFullscreen(false)}
+                  className="absolute top-4 right-4 z-30 bg-zinc-900/80 backdrop-blur-md border border-zinc-700 hover:bg-zinc-800 text-zinc-100 shadow-xl"
+                >
+                  <Minimize className="w-4 h-4 mr-2" />
+                  Exit Full Screen
+                </Button>
+              )}
               
               {isUpdating && (
                 <div className="absolute inset-0 bg-zinc-950/40 backdrop-blur-[2px] flex items-center justify-center z-20">
@@ -213,59 +243,61 @@ export default function App() {
             </div>
 
             {/* Input Area */}
-            <div className="p-6 bg-zinc-900/80 border-t border-zinc-800 backdrop-blur-xl">
-              <div className="max-w-4xl mx-auto relative">
-                <div className="flex gap-3 items-end">
-                  <div className="flex-1 relative group">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-indigo-400 transition-colors">
-                      <Sparkles className="w-5 h-5" />
+            {!isFullscreen && (
+              <div className="p-6 bg-zinc-900/80 border-t border-zinc-800 backdrop-blur-xl">
+                <div className="max-w-4xl mx-auto relative">
+                  <div className="flex gap-3 items-end">
+                    <div className="flex-1 relative group">
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-indigo-400 transition-colors">
+                        <Sparkles className="w-5 h-5" />
+                      </div>
+                      <Input 
+                        placeholder="Request a change... (e.g., 'Make the header dark with a neon glow')"
+                        value={prompt}
+                        onChange={(e) => setPrompt(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && handleUpdate()}
+                        className="pl-12 pr-4 h-14 bg-zinc-950 border-zinc-800 focus:border-indigo-500/50 focus:ring-indigo-500/20 rounded-xl text-base shadow-inner"
+                      />
                     </div>
-                    <Input 
-                      placeholder="Request a change... (e.g., 'Make the header dark with a neon glow')"
-                      value={prompt}
-                      onChange={(e) => setPrompt(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && handleUpdate()}
-                      className="pl-12 pr-4 h-14 bg-zinc-950 border-zinc-800 focus:border-indigo-500/50 focus:ring-indigo-500/20 rounded-xl text-base shadow-inner"
-                    />
+                    <Button 
+                      onClick={handleUpdate}
+                      disabled={!prompt.trim() || isUpdating}
+                      className="h-14 px-8 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl shadow-lg shadow-indigo-600/20 transition-all active:scale-95"
+                    >
+                      <Send className="w-5 h-5 mr-2" />
+                      Update
+                    </Button>
                   </div>
-                  <Button 
-                    onClick={handleUpdate}
-                    disabled={!prompt.trim() || isUpdating}
-                    className="h-14 px-8 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl shadow-lg shadow-indigo-600/20 transition-all active:scale-95"
-                  >
-                    <Send className="w-5 h-5 mr-2" />
-                    Update
-                  </Button>
-                </div>
-                
-                <div className="mt-3 flex items-center justify-between px-2">
-                  <div className="flex items-center gap-4">
-                    <Tooltip>
-                      <TooltipTrigger className="flex items-center gap-1.5 text-[10px] text-zinc-500 uppercase tracking-wider font-semibold cursor-help bg-transparent border-none p-0 outline-none">
-                        <ShieldAlert className="w-3 h-3 text-amber-500" />
-                        <span>Strict Safety Mode Active</span>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="max-w-xs bg-zinc-900 border-zinc-800 text-zinc-300">
-                        <p>Our AI model filters for harmful, offensive, or illegal content. Requests violating these policies will be rejected.</p>
-                      </TooltipContent>
-                    </Tooltip>
+                  
+                  <div className="mt-3 flex items-center justify-between px-2">
+                    <div className="flex items-center gap-4">
+                      <Tooltip>
+                        <TooltipTrigger className="flex items-center gap-1.5 text-[10px] text-zinc-500 uppercase tracking-wider font-semibold cursor-help bg-transparent border-none p-0 outline-none">
+                          <ShieldAlert className="w-3 h-3 text-amber-500" />
+                          <span>Strict Safety Mode Active</span>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-xs bg-zinc-900 border-zinc-800 text-zinc-300">
+                          <p>Our AI model filters for harmful, offensive, or illegal content. Requests violating these policies will be rejected.</p>
+                        </TooltipContent>
+                      </Tooltip>
 
-                    <Tooltip>
-                      <TooltipTrigger className="flex items-center gap-1.5 text-[10px] text-zinc-500 uppercase tracking-wider font-semibold cursor-help bg-transparent border-none p-0 outline-none">
-                        <Info className="w-3 h-3 text-blue-500" />
-                        <span>Token Optimized</span>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="max-w-xs bg-zinc-900 border-zinc-800 text-zinc-300">
-                        <p>Requests are optimized to minimize token usage while maintaining high quality output.</p>
-                      </TooltipContent>
-                    </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger className="flex items-center gap-1.5 text-[10px] text-zinc-500 uppercase tracking-wider font-semibold cursor-help bg-transparent border-none p-0 outline-none">
+                          <Info className="w-3 h-3 text-blue-500" />
+                          <span>Token Optimized</span>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-xs bg-zinc-900 border-zinc-800 text-zinc-300">
+                          <p>Requests are optimized to minimize token usage while maintaining high quality output.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                    <p className="text-[10px] text-zinc-600 italic">
+                      AI updates HTML, CSS, and JS live
+                    </p>
                   </div>
-                  <p className="text-[10px] text-zinc-600 italic">
-                    AI updates HTML, CSS, and JS live
-                  </p>
                 </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Sidebar History */}
