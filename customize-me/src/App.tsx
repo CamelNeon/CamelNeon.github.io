@@ -54,12 +54,7 @@ const INITIAL_CODE = `<!DOCTYPE html>
             </svg>
         </div>
         <h1 class="text-3xl font-bold text-gray-900">Welcome to Your Live Page</h1>
-        <p class="text-gray-600">This is a starting point. Tell the AI what you want to change, and it will update this page live!</p>
-        <div class="pt-4">
-            <button class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                Explore Features
-            </button>
-        </div>
+        <p class="text-gray-600">This is a starting point. Select one of the three AI model at the top right, tell the AI what you want to change, and it will update this page live!</p>
     </div>
 </body>
 </html>`;
@@ -197,7 +192,7 @@ export default function App() {
               </div>
               <h1 className="font-bold text-lg tracking-tight">Live Page Architect</h1>
               <Badge variant="outline" className="ml-2 border-zinc-700 text-zinc-400 font-mono text-[10px] uppercase tracking-widest">
-                v1.0.0
+                v2.0.0
               </Badge>
             </div>
 
